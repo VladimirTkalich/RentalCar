@@ -1,0 +1,26 @@
+{
+  "id": "9b1ad027-66fd-4ebf-a944-0fbab58664ca",
+  "name": "RentalCar",
+  "publisher": "Default publisher",
+  "version": "1.0.0.0",
+  "brief": "",
+  "description": "",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "1.0.0.0",
+  "application": "18.0.0.0",
+  "idRanges": [
+    {
+      "from": 50100,
+      "to": 50149
+    }
+  ],
+  "contextSensitiveHelpUrl": "https://RentalCar.com/help/",
+  "showMyCode": true,
+  "runtime": "7.0"
+}
