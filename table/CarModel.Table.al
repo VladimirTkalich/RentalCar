@@ -1,9 +1,9 @@
-table 50122 tvvCarBodyType
+table 50122 tvvCarModel //All models of car
 {
     Caption = 'Car Body Type';
     DataClassification = CustomerContent;
-    LookupPageId = tvvCarBodyType;
-    DrillDownPageId = tvvCarBodyType;
+    LookupPageId = tvvCarModel;
+    DrillDownPageId = tvvCarModel;
 
     fields
     {
@@ -12,9 +12,9 @@ table 50122 tvvCarBodyType
             Caption = 'No.';
             DataClassification = CustomerContent;
         }
-        field(2; CarBodyType; Text[20])
+        field(2; NameModel; Text[20])
         {
-            Caption = 'Car Body Type';
+            Caption = 'Car Model';
             DataClassification = CustomerContent;
         }
     }

@@ -1,10 +1,10 @@
-page 50122 tvvCarBodyType
+page 50122 tvvCarModel
 {
 
     ApplicationArea = All;
-    Caption = 'Car Body Type';
+    Caption = 'Car Models';
     PageType = List;
-    SourceTable = tvvCarBodyType;
+    SourceTable = tvvCarModel;
     UsageCategory = Lists;
 
     layout
@@ -18,9 +18,9 @@ page 50122 tvvCarBodyType
                     ToolTip = 'Specifies the value of the No. field';
                     ApplicationArea = All;
                 }
-                field(CarBodyType; Rec.CarBodyType)
+                field(NameModel; Rec.NameModel)
                 {
-                    ToolTip = 'Specifies the value of the Car Body Type field';
+                    ToolTip = 'Specifies the value of the NameModel field';
                     ApplicationArea = All;
                 }
             }
