@@ -1,5 +1,6 @@
 page 50122 tvvCarModel
 {
+    //TODO The table for names of car's models. For uniform writing model names 
 
     ApplicationArea = All;
     Caption = 'Car Models';

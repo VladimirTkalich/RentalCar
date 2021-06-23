@@ -23,6 +23,11 @@ pageextension 50127 RentalCarRC extends "Business Manager Role Center"
                     RunObject = page "Salespersons/Purchasers"; //tvvRentalSalespersons;
                     ApplicationArea = All;
                 }
+                action("Rental Sales Orders")
+                {
+                    RunObject = page "tvvRentalSalesHeaders";
+                    ApplicationArea = All;
+                }
             }
         }
         addafter(Customer)

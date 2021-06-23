@@ -17,6 +17,7 @@ tableextension 50119 tvvRentalCar extends Item
             Caption = 'Model Name';
             FieldClass = FlowField;
             CalcFormula = lookup(tvvCarModel.NameModel where(NameModel = field("No.")));
+            Editable = false;
         }
         field(50112; Mileage; Integer)
         {
