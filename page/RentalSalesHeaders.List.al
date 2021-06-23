@@ -30,11 +30,6 @@ page 50128 tvvRentalSalesHeaders
                     ToolTip = 'Specifies the value of the Customer Name field';
                     ApplicationArea = All;
                 }
-                field(Phone; Rec.Phone)
-                {
-                    ToolTip = 'Specifies the value of the Contact field';
-                    ApplicationArea = All;
-                }
                 field("Salesperson Name"; Rec."Salesperson Name")
                 {
                     ToolTip = 'Specifies the value of the Salesperson Name field';

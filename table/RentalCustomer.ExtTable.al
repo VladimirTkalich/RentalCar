@@ -25,7 +25,8 @@ tableextension 50125 tvvRentalCustomer extends Customer
         field(50104; DriverAge; Text[20])
         {
             Caption = 'Driver Age';
-            FieldClass = FlowField;
+            DataClassification = CustomerContent;
+            //FieldClass = FlowField;
             //TODO Add calculation the current age of the driver 
         }
         field(50105; "Passport No"; Text[20])

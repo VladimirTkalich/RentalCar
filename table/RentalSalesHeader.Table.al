@@ -43,12 +43,6 @@ table 50128 tvvRentalSalesHeader
             CalcFormula = lookup("Salesperson/Purchaser".Name where("Code" = field("Salesperson No.")));
             Editable = false;
         }
-        field(7; Phone; Text[30])
-        {
-            Caption = 'Contact';
-            DataClassification = CustomerContent;
-            ExtendedDatatype = PhoneNo;
-        }
         field(8; "Posting Date"; Date)
         {
             Caption = 'Posting Date';

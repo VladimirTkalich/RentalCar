@@ -39,14 +39,19 @@ page 50129 tvvRentalSalesLines
                     ToolTip = 'Specifies the value of the Daily Price field';
                     ApplicationArea = All;
                 }
-                field("Rental Days"; Rec."Rental Days")
-                {
-                    ToolTip = 'Specifies the value of the Rental Days field';
-                    ApplicationArea = All;
-                }
                 field("Start Date"; Rec."Start Date")
                 {
                     ToolTip = 'Specifies the value of the Start Date field';
+                    ApplicationArea = All;
+                }
+                field("End Date"; Rec."End Date")
+                {
+                    ToolTip = 'Specifies the value of the End Date field';
+                    ApplicationArea = All;
+                }
+                field("Rental Days"; Rec."Rental Days")
+                {
+                    ToolTip = 'Specifies the value of the Rental Days field';
                     ApplicationArea = All;
                 }
                 /*                 field("Pick up Location"; Rec."Pick up Location")

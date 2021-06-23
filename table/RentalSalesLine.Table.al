@@ -74,6 +74,19 @@ table 50129 tvvRentalSalesLine
         {
             Caption = 'Start Date';
             DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                CalcRentalDays();
+            end;
+        }
+        field(19; "End Date"; Date)
+        {
+            Caption = 'End Date';
+            DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                CalcRentalDays();
+            end;
         }
         field(9; "Additional Drivers"; Integer)
         {
@@ -119,5 +132,23 @@ table 50129 tvvRentalSalesLine
             Clustered = true;
         }
     }
-
+    local procedure CalcRentalDays()
+    var
+        TDay: Integer;
+    begin
+        TDay := 0;
+        if (Rec."Start Date" < TODAY()) then begin
+            Rec."Rental Days" := TDay;
+            Message('Start Date cannot be less than today');
+            exit;
+        end;
+        if (Rec."End Date" <> 0D) AND (Rec."Start Date" <> 0D) then begin
+            TDay := Rec."End Date" - Rec."Start Date";
+            if (TDay < 0) then begin
+                TDay := 0;
+                Message('End Date cannot be less than Start Date');
+            end;
+            Rec."Rental Days" := TDay;
+        end;
+    end;
 }

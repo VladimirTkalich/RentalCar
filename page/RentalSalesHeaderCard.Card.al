@@ -25,21 +25,26 @@ page 50100 tvvRentalSalesHeaderCard
                 {
                     ToolTip = 'Specifies the value of the Customer No. field';
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
                 field("Customer Name"; Rec."Customer Name")
                 {
                     ToolTip = 'Specifies the value of the Customer Name field';
                     ApplicationArea = All;
                 }
-                field(Phone; Rec.Phone)
-                {
-                    ToolTip = 'Specifies the value of the Contact field';
-                    ApplicationArea = All;
-                }
                 field("Salesperson No."; Rec."Salesperson No.")
                 {
                     ToolTip = 'Specifies the value of the Salesperson No. field';
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
                 field("Salesperson Name"; Rec."Salesperson Name")
                 {
@@ -57,7 +62,7 @@ page 50100 tvvRentalSalesHeaderCard
                     ApplicationArea = All;
                 }
             }
-            part("Rental Sales Lines Part"; tvvRentalSalesLinesPart)
+            part("Ordered Cars"; tvvRentalSalesLinesPart)
             {
                 SubPageLink = "Order No." = field("Order No.");
                 ApplicationArea = All;

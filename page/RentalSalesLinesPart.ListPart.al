@@ -2,7 +2,7 @@ page 50130 tvvRentalSalesLinesPart
 {
 
     ApplicationArea = All;
-    Caption = 'Rental Sales Lines Part';
+    Caption = 'Ordered Cars';
     PageType = ListPart;
     SourceTable = tvvRentalSalesLine;
     UsageCategory = Lists;
@@ -30,6 +30,11 @@ page 50130 tvvRentalSalesLinesPart
                 {
                     ToolTip = 'Specifies the value of the Car No. field';
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
                 field("Car Description"; Rec."Car Description")
                 {
@@ -41,14 +46,19 @@ page 50130 tvvRentalSalesLinesPart
                     ToolTip = 'Specifies the value of the Daily Price field';
                     ApplicationArea = All;
                 }
-                field("Rental Days"; Rec."Rental Days")
-                {
-                    ToolTip = 'Specifies the value of the Rental Days field';
-                    ApplicationArea = All;
-                }
                 field("Start Date"; Rec."Start Date")
                 {
                     ToolTip = 'Specifies the value of the Start Date field';
+                    ApplicationArea = All;
+                }
+                field("End Date"; Rec."End Date")
+                {
+                    ToolTip = 'Specifies the value of the End Date field';
+                    ApplicationArea = All;
+                }
+                field("Rental Days"; Rec."Rental Days")
+                {
+                    ToolTip = 'Specifies the value of the Rental Days field';
                     ApplicationArea = All;
                 }
 
