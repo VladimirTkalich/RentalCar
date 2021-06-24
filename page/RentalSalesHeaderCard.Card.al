@@ -76,6 +76,15 @@ page 50100 tvvRentalSalesHeaderCard
                 ApplicationArea = All;
                 UpdatePropagation = Both;
             }
+            // group("Rental Order Amount")
+            // {
+            field("Order Amount"; Rec."Order Amount")
+            {
+                ToolTip = 'Specifies the value of the Order Amount field';
+                ApplicationArea = All;
+            }
+
+            // }
         }
     }
 

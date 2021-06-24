@@ -69,6 +69,7 @@ table 50129 tvvRentalSalesLine
             Caption = 'Rental Days';
             DataClassification = CustomerContent;
             InitValue = 0;
+            Editable = false;
         }
         field(18; "Start Date"; Date)
         {
@@ -78,6 +79,7 @@ table 50129 tvvRentalSalesLine
             begin
                 CalcRentalDays();
                 CalcLineAmount();
+                CalcOrderAmount();
             end;
         }
         field(19; "End Date"; Date)
@@ -88,6 +90,7 @@ table 50129 tvvRentalSalesLine
             begin
                 CalcRentalDays();
                 CalcLineAmount();
+                CalcOrderAmount();
             end;
         }
         field(9; "Additional Drivers"; Integer)
@@ -161,20 +164,20 @@ table 50129 tvvRentalSalesLine
 
     local procedure CalcLineAmount()
     var
-        TempSum: Integer;
+        TempSum: Decimal;
         CustomerDiscount: Integer;
     begin
         TempSum := 0;
         CustomerDiscount := 0;
-        if (Rec."Rental Days" > 0) AND (Rec."Daily Price" > 0) then begin
-            TempSum := Rec."Daily Price" * Rec."Rental Days";
+        if ("Rental Days" > 0) AND ("Daily Price" > 0) then begin
+            TempSum := "Daily Price" * "Rental Days";
             if (GetCustomerDiscountIfExist(CustomerDiscount)) then begin
                 TempSum := TempSum - (TempSum * CustomerDiscount) / 100;
             end;
             Rec."Line Amount" := Round(TempSum, 0.01, '>');
         end
         else
-            Rec."Line Amount" := 0;
+            "Line Amount" := 0;
     end;
 
     local procedure GetCustomerDiscountIfExist(var CustDiscount: Integer): Boolean
@@ -188,6 +191,24 @@ table 50129 tvvRentalSalesLine
             exit(false)
         else
             exit(true);
+    end;
+
+    local procedure CalcOrderAmount()
+    var
+        RentalLines: Record tvvRentalSalesLine;
+        TempAmount: Decimal;
+    begin
+        TempAmount := 0;
+        if RentalHeader.Get("Order No.") then begin
+            RentalLines.SetRange("Order No.", RentalHeader."Order No.");
+            if RentalLines.FindFirst() then begin
+                repeat
+                    TempAmount := TempAmount + RentalLines."Line Amount";
+                until RentalLines.Next() = 0;
+            end;
+            RentalHeader."Order Amount" := TempAmount;
+            RentalHeader.Modify();
+        end;
     end;
 
     var

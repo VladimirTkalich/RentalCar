@@ -68,6 +68,12 @@ table 50128 tvvRentalSalesHeader
             Caption = 'Order Date';
             DataClassification = CustomerContent;
         }
+        field(11; "Order Amount"; Decimal)
+        {
+            Caption = 'Order Amount';
+            DataClassification = CustomerContent;
+            InitValue = 0;
+        }
     }
     keys
     {
