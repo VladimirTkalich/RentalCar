@@ -35,6 +35,13 @@ page 50100 tvvRentalSalesHeaderCard
                 {
                     ToolTip = 'Specifies the value of the Customer Name field';
                     ApplicationArea = All;
+                    Editable = false;
+                }
+                field("Customer Discount"; Rec."Customer Discount")
+                {
+                    ToolTip = 'Specifies the value of the Customer Discount field';
+                    ApplicationArea = All;
+                    Editable = false;
                 }
                 field("Salesperson No."; Rec."Salesperson No.")
                 {
@@ -50,6 +57,7 @@ page 50100 tvvRentalSalesHeaderCard
                 {
                     ToolTip = 'Specifies the value of the Salesperson Name field';
                     ApplicationArea = All;
+                    Editable = false;
                 }
                 field("Posting Date"; Rec."Posting Date")
                 {

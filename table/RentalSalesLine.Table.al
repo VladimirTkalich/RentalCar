@@ -68,7 +68,7 @@ table 50129 tvvRentalSalesLine
         {
             Caption = 'Rental Days';
             DataClassification = CustomerContent;
-            InitValue = 1;
+            InitValue = 0;
         }
         field(18; "Start Date"; Date)
         {
@@ -77,6 +77,7 @@ table 50129 tvvRentalSalesLine
             trigger OnValidate()
             begin
                 CalcRentalDays();
+                CalcLineAmount();
             end;
         }
         field(19; "End Date"; Date)
@@ -86,6 +87,7 @@ table 50129 tvvRentalSalesLine
             trigger OnValidate()
             begin
                 CalcRentalDays();
+                CalcLineAmount();
             end;
         }
         field(9; "Additional Drivers"; Integer)
@@ -122,6 +124,7 @@ table 50129 tvvRentalSalesLine
         {
             Caption = 'Line Amount';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
     }
@@ -148,7 +151,45 @@ table 50129 tvvRentalSalesLine
                 TDay := 0;
                 Message('End Date cannot be less than Start Date');
             end;
+            if (TDay = 0) then begin
+                TDay := 0;
+                Message('End Date cannot be e Start Date');
+            end;
             Rec."Rental Days" := TDay;
         end;
     end;
+
+    local procedure CalcLineAmount()
+    var
+        TempSum: Integer;
+        CustomerDiscount: Integer;
+    begin
+        TempSum := 0;
+        CustomerDiscount := 0;
+        if (Rec."Rental Days" > 0) AND (Rec."Daily Price" > 0) then begin
+            TempSum := Rec."Daily Price" * Rec."Rental Days";
+            if (GetCustomerDiscountIfExist(CustomerDiscount)) then begin
+                TempSum := TempSum - (TempSum * CustomerDiscount) / 100;
+            end;
+            Rec."Line Amount" := Round(TempSum, 0.01, '>');
+        end
+        else
+            Rec."Line Amount" := 0;
+    end;
+
+    local procedure GetCustomerDiscountIfExist(var CustDiscount: Integer): Boolean
+    begin
+        CustDiscount := 0;
+        if RentalHeader.Get("Order No.") then
+            CustDiscount := RentalHeader."Customer Discount"
+        else
+            exit(false);
+        if (CustDiscount = 0) then
+            exit(false)
+        else
+            exit(true);
+    end;
+
+    var
+        RentalHeader: Record tvvRentalSalesHeader;
 }

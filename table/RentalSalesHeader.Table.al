@@ -22,6 +22,15 @@ table 50128 tvvRentalSalesHeader
             Caption = 'Customer No.';
             DataClassification = CustomerContent;
             TableRelation = Customer;
+            trigger OnValidate()
+            var
+                TempCustomer: Record Customer;
+            begin
+                if (Rec."Customer No." <> '') AND (TempCustomer.Get(Rec."Customer No.")) then begin
+                    Rec."Customer Discount" := TempCustomer.Discount;
+                end;
+            end;
+
         }
         field(4; "Customer Name"; Text[100])
         {
@@ -29,6 +38,12 @@ table 50128 tvvRentalSalesHeader
             FieldClass = FlowField;
             CalcFormula = lookup(Customer.Name where("No." = field("Customer No.")));
             Editable = false;
+        }
+        field(10; "Customer Discount"; Integer)
+        {
+            Caption = 'Customer Discount';
+            DataClassification = CustomerContent;
+            InitValue = 0;
         }
         field(5; "Salesperson No."; Code[20])
         {
