@@ -1,2 +1,9 @@
-.vscode/
-
+.alcache
+.altemplates
+.alpackages
+.snapshots
+debug.log
+rad.json
+launch.json
+*.app
+*.xlf

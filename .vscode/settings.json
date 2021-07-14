@@ -1,0 +1,19 @@
+{
+    "al.enableCodeActions": true,
+    "al.enableCodeAnalysis": false,
+    "al.codeAnalyzers": [
+        //"${CodeCop}",
+        // "${PerTenantExtensionCop}", //not for ISV
+        //"${AppSourceCop}",
+        //"${UICop}" 
+    ],
+    "CRS.ObjectNamePrefix": "RSC_",
+    "CRS.FileNamePattern": "<ObjectNameShort>.<ObjectTypeShort>.al",
+    "CRS.FileNamePatternExtensions": "<ObjectTypeShort><BaseId>-Ext<ObjectId>.<ObjectNameShort>.al",
+    "CRS.OnSaveAlFileAction": "Rename",
+    "git.enableSmartCommit": true,
+    //"al.ruleSetPath": "./ruleset.json",
+    "editor.maxTokenizationLineLength": 50000,
+    "gitignore.cacheExpirationInterval": 3600,
+    "al-xml-doc.CheckProcedureDocumentationInformationLevel": "Disabled"
+}
