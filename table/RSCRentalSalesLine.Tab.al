@@ -1,3 +1,6 @@
+/// <summary>
+/// Table RSC_RentalSalesLine (ID 50129).
+/// </summary>
 table 50129 "RSC_RentalSalesLine"
 {
     Caption = 'Rental Sales Line';

@@ -1,3 +1,6 @@
+/// <summary>
+/// PageExtension RSC_RentalCarList (ID 50119) extends Record Item List.
+/// </summary>
 pageextension 50119 "RSC_RentalCarList" extends "Item List"
 {
     Caption = 'Rental Cars';

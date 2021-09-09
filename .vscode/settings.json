@@ -9,7 +9,7 @@
     ],
     "CRS.ObjectNamePrefix": "RSC_",
     "CRS.FileNamePattern": "<ObjectNameShort>.<ObjectTypeShort>.al",
-    "CRS.FileNamePatternExtensions": "<ObjectTypeShort><BaseId>-Ext<ObjectId>.<ObjectNameShort>.al",
+    "CRS.FileNamePatternExtensions": "<ObjectTypeShort>-Ext.<ObjectId>.<ObjectNameShort>.al",
     "CRS.OnSaveAlFileAction": "Rename",
     "git.enableSmartCommit": true,
     //"al.ruleSetPath": "./ruleset.json",

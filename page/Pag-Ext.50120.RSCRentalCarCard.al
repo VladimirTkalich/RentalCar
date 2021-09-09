@@ -1,17 +1,12 @@
+/// <summary>
+/// PageExtension RSC_RentalCarCard (ID 50120) extends Record Item Card.
+/// </summary>
 pageextension 50120 "RSC_RentalCarCard" extends "Item Card"
 {
     Caption = 'Rental Car';
 
     layout
     {
-        /*         addbefore(Description)
-                {
-                    field("RSC_Model"; Rec.NameModel)
-                    {
-                        ApplicationArea = all;
-                    }
-                }
-         */
         addbefore(Type)
         {
             field("RSC_Mileage"; Rec.RSC_Mileage)
@@ -27,13 +22,14 @@ pageextension 50120 "RSC_RentalCarCard" extends "Item Card"
                 ApplicationArea = all;
             }
         }
-        modify("Base Unit of Measure")
-        {
-            Visible = false;
-        }
-        modify(Type)
-        {
-            Visible = false;
-        }
+        // modify("Base Unit of Measure")
+        // {
+        //     Visible = false;
+        // }
+        // modify(Type)
+        // {
+        //     Visible = false;
+        // }
     }
+
 }
