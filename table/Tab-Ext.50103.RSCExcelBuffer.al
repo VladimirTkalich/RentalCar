@@ -11,4 +11,5 @@ tableextension 50103 RSC_Excel_Buffer extends "Excel Buffer"
             DataClassification = CustomerContent;
         }
     }
+
 }

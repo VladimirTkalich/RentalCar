@@ -48,6 +48,18 @@ pageextension 50127 "RSC_Role_Center" extends "Service Dispatcher Role Center" /
                     RunObject = Report RSC_Cars_RDLC;
                     ToolTip = 'Available Cars RDLC';
                 }
+                action("RSC_Excel")
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Excel Report';
+                    Image = "Report";
+                    Promoted = true;
+                    PromotedCategory = "Report";
+                    PromotedIsBig = true;
+                    RunObject = Report RSC_Service_Order_Excel;
+                    ToolTip = 'Excel Report';
+
+                }
             }
         }
 
