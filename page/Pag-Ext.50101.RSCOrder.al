@@ -57,6 +57,36 @@ pageextension 50101 RSC_Order extends "Service Order"
         {
             Visible = false;
         }
+
+    }
+    actions
+    {
+        addafter("&Print")
+        {
+            action("RSC_RSC report RDLC")
+            {
+                ApplicationArea = Service;
+                Caption = 'RSC report RDLC';
+                Ellipsis = true;
+                Image = Print;
+                Promoted = true;
+                PromotedCategory = Category5;
+                //RunObject = Report RSC_Service_Order_RDLC;
+                ToolTip = 'RSC report RDLC';
+                trigger OnAction()
+                var
+                    ServiceHeader: Record "Service Header";
+                begin
+                    //ServiceHeader.SetRange("Document Type", Rec."Document Type");
+                    //ServiceHeader.SetRange("No.", Rec."No.");
+                    ServiceHeader.SetRange("Customer No.", Rec."Customer No.");
+                    // ServiceHeader.FindFirst();
+                    ServiceHeader.Get(Rec."Document Type", Rec."No.");
+                    ServiceHeader.SetRecFilter();
+                    Report.Run(Report::RSC_Service_Order_RDLC, true, true, ServiceHeader);
+                end;
+            }
+        }
     }
 
     // trigger OnOpenPage()

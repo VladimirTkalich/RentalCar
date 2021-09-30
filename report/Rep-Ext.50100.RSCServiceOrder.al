@@ -1,7 +1,7 @@
 /// <summary>
 /// Unknown "RSC_Service_Order" (ID 50100) extends Record Service Order.
 /// </summary>
-reportextension 50103 RSC_Service_Order extends "Service Order"
+reportextension 50100 RSC_Service_Order extends "Service Order"
 {
     RDLCLayout = 'report\layout\RSC_ServiceOrder.rdlc';
 
@@ -17,7 +17,5 @@ reportextension 50103 RSC_Service_Order extends "Service Order"
     }
 
     var
-        MyCaption: Label 'Rental Car Service Order %1';
-
-
+        MyCaption: Label 'Rental Car Service Order';
 }
