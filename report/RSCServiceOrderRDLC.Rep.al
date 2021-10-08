@@ -119,6 +119,13 @@ report 50103 RSC_Service_Order_RDLC
             column(CompanyState; CompanyInfo.County)
             {
             }
+            column(PageCaption; PageCaptionLbl)
+            {
+            }
+            column(PageFooterTotal; PageFooterTotalLbl)
+            {
+            }
+
             dataitem("Service Item Line"; "Service Item Line")
             {
                 DataItemLink = "Document Type" = FIELD("Document Type"), "Document No." = FIELD("No.");
@@ -159,6 +166,10 @@ report 50103 RSC_Service_Order_RDLC
                     DataItemLink = "Document Type" = FIELD("Document Type"), "Service Item No." = FIELD("Service Item No.");
                     DataItemLinkReference = "Service Item Line";
                     DataItemTableView = SORTING("Document Type", "Service Item No.", "Line No.");
+
+                    column(OrderAmount; OrderAmount)
+                    {
+                    }
                     column(Service_LinesCaption; Service_LinesCaptionLbl)
                     {
                     }
@@ -216,6 +227,10 @@ report 50103 RSC_Service_Order_RDLC
                     column(Service_Line_Line_AmountLbl; FieldCaption("Line Amount"))
                     {
                     }
+                    trigger OnAfterGetRecord()
+                    begin
+                        OrderAmount := "Line Amount";
+                    end;
                 }
 
             }
@@ -248,6 +263,9 @@ report 50103 RSC_Service_Order_RDLC
         Service_Item_LinesCaptionLbl: Label 'Rental Item Lines';
         Service_Item_Line__Response_Date_CaptionLbl: Label 'Date';
         Service_LinesCaptionLbl: Label 'Rental Lines';
+        PageCaptionLbl: Label 'Page:';
+        PageFooterTotalLbl: Label 'Order total:';
+        OrderAmount: Decimal;
 
     trigger OnPreReport()
     begin
