@@ -39,4 +39,9 @@ tableextension 50101 RSC_Order_Header extends "Service Header"
         Rec."Service Order Type" := 'RENTALCAR';
     end;
 
+    [IntegrationEvent(false, false)]
+    local procedure RSC_OnChangeStatus()
+    begin
+    end;
+
 }

@@ -57,6 +57,15 @@ pageextension 50101 RSC_Order extends "Service Order"
         {
             Visible = false;
         }
+        modify(Status)
+        {
+            trigger OnBeforeValidate();
+            var
+                Publisher: Codeunit RSC_Publishers;
+            begin
+                Publisher.RSC_OnChangeStatusCU();
+            end;
+        }
 
     }
     actions
