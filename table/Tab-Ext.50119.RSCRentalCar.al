@@ -1,3 +1,6 @@
+/// <summary>
+/// TableExtension RSC_RentalCar (ID 50119) extends Record Item.
+/// </summary>
 tableextension 50119 "RSC_RentalCar" extends Item
 {
     fields
@@ -44,4 +47,18 @@ tableextension 50119 "RSC_RentalCar" extends Item
 
         //TODO Add field Inshurance wich related to the table with the inshurance plicy information 
     }
+
+    // trigger OnAfterInsert()
+    // begin
+    //     SetUpRentalCar();
+    // end;
+
+    // local procedure SetUpRentalCar()
+    // var
+    //     ItemType: Enum "Item Type";
+    // begin
+    //     Rec."Base Unit of Measure" := 'DAY';
+    //     Rec.Type := ItemType::Service;
+    // end;
+
 }
