@@ -91,6 +91,7 @@ codeunit 50103 "RSC_PurchaseReferenceMgt"
         PurchHeader.Get(PurchLine."Document Type", PurchLine."Document No.");
         Item."Vendor No." := PurchHeader."Buy-from Vendor No.";
         Item."Vendor Item No." := PurchLine."Item Reference No.";
+        Item.Description := PurchLine."Item Reference No.";
 
         CreateReferenceForItem(Item);
 
