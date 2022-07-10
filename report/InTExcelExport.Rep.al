@@ -261,9 +261,10 @@ report 50104 "InT_Excel_Export"
         TempExcelBufTemp.NewRow();
         TempExcelBufTemp.AddColumn(Item.FieldCaption("No."), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item.FieldCaption(Description), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
-        TempExcelBufTemp.AddColumn(Item.FieldCaption(Type), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item.FieldCaption("Base Unit of Measure"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
+        TempExcelBufTemp.AddColumn(Item.FieldCaption(Type), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item.FieldCaption("Unit Cost"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
+        TempExcelBufTemp.AddColumn(Item.FieldCaption("Item Category Code"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item.FieldCaption("Last Date Modified"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
     end;
 
@@ -272,9 +273,10 @@ report 50104 "InT_Excel_Export"
         TempExcelBufTemp.NewRow();
         TempExcelBufTemp.AddColumn(Item."No.", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item.Description, false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
-        TempExcelBufTemp.AddColumn(Item.Type, false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item."Base Unit of Measure", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
+        TempExcelBufTemp.AddColumn(Item.Type, false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item."Unit Cost", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Number);
+        TempExcelBufTemp.AddColumn(Item."Item Category Code", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Item."Last Date Modified", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Date);
     end;
 }
