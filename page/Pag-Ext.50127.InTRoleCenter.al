@@ -11,6 +11,17 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
         {
             group("Intern's Tasks")
             {
+                action(InT_SalesOrder_Excel)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Sales Order to Excel (T6)';
+                    Image = "Report";
+                    Promoted = true;
+                    PromotedCategory = "Report";
+                    PromotedIsBig = true;
+                    RunObject = Report "InT_Sales Order to Excel";
+                    ToolTip = 'Excel Report';
+                }
                 action(InT_RSC_Excel)
                 {
                     ApplicationArea = Basic, Suite;
@@ -32,18 +43,6 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     PromotedIsBig = true;
                     RunObject = Report InT_Excel_Export;
                     ToolTip = 'Excel Export';
-                }
-                action(InT_SalesOrder_Excel)
-                {
-                    ApplicationArea = Basic, Suite;
-                    Caption = 'Sales Order to Excel';
-                    Image = "Report";
-                    Promoted = true;
-                    PromotedCategory = "Report";
-                    PromotedIsBig = true;
-                    RunObject = Report "Sales Order to Excel";
-                    ToolTip = 'Excel Report';
-
                 }
                 // action("InT_RSC_Rental Cars")
                 // {

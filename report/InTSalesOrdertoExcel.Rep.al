@@ -1,4 +1,4 @@
-report 50100 "Sales Order to Excel"
+report 50100 "InT_Sales Order to Excel"
 {
     UsageCategory = ReportsAndAnalysis;
     ApplicationArea = All;
@@ -14,7 +14,7 @@ report 50100 "Sales Order to Excel"
 
                 trigger OnAfterGetRecord()
                 begin
-                    MakeExcelDataDocLine_SalesLine();
+                    MakeExcelSalesLine();
                 end;
 
             }
@@ -23,19 +23,19 @@ report 50100 "Sales Order to Excel"
                 SalesDocumentType: Enum "Sales Document Type";
             begin
                 if "Sales Header"."Document Type" = SalesDocumentType::Order then
-                    MakeExcelDataHeaderLine_SalesHeader()
+                    MakeExcelHeaderLine()
                 else
                     CurrReport.Skip();
             end;
 
             trigger OnPreDataItem()
             begin
-                MakeExcelDataHeader_SalesHeader();
+                MakeExcelHeader();
             end;
 
             trigger OnPostDataItem()
             begin
-                OnlyCreateExcelbook(SalesOrdersLbl, CaptionExelBookLbl, false);
+                CreateExcelbook(SalesOrdersLbl);
             end;
         }
 
@@ -50,7 +50,7 @@ report 50100 "Sales Order to Excel"
 
     trigger OnPostReport()
     begin
-        OnlyReadExcelbook();
+        ReadExcelbook();
     end;
 
 
@@ -67,32 +67,15 @@ report 50100 "Sales Order to Excel"
 
 
 
-    local procedure OnlyCreateExcelbook(SheetName: Text[250]; ReportHeader: Text; IsCreated: Boolean)
+    local procedure CreateExcelbook(SheetName: Text[250])
     begin
-        if not IsCreated then begin
-            TempExcelBufTemp.CreateNewBook(SheetName);
-            TempExcelBufTemp.SetFriendlyFilename(CaptionExelBookLbl);
-        end else
-            TempExcelBufTemp.SelectOrAddSheet(SheetName);
-        ChangeColumnWeigth();
-        TempExcelBufTemp.ClearNewRow();
-        TempExcelBufTemp.WriteSheet(ReportHeader, CompanyName, UserId);
-        TempExcelBufTemp.SetColumnWidth('A', 17);
-        TempExcelBufTemp.SetColumnWidth('B', 15.5);
-    end;
+        TempExcelBufTemp.CreateNewBook(SheetName);
+        TempExcelBufTemp.SetFriendlyFilename(CaptionExelBookLbl);
 
-    local procedure OnlyReadExcelbook()
-    begin
-        TempExcelBufTemp.CloseBook();
-        TempExcelBufTemp.OpenExcel();
-    end;
-
-    local procedure ChangeColumnWeigth()
-    begin
-        TempExcelBufTemp.SetColumnWidth('A', 14);
-        TempExcelBufTemp.SetColumnWidth('B', 12);
+        TempExcelBufTemp.SetColumnWidth('A', 10);
+        TempExcelBufTemp.SetColumnWidth('B', 14);
         TempExcelBufTemp.SetColumnWidth('C', 18);
-        TempExcelBufTemp.SetColumnWidth('D', 22);
+        TempExcelBufTemp.SetColumnWidth('D', 25);
         TempExcelBufTemp.SetColumnWidth('E', 19);
         TempExcelBufTemp.SetColumnWidth('F', 10);
         TempExcelBufTemp.SetColumnWidth('G', 19);
@@ -100,6 +83,17 @@ report 50100 "Sales Order to Excel"
         TempExcelBufTemp.SetColumnWidth('I', 19.5);
         TempExcelBufTemp.SetColumnWidth('J', 13.5);
         TempExcelBufTemp.SetColumnWidth('K', 13);
+
+        TempExcelBufTemp.ClearNewRow();
+        TempExcelBufTemp.WriteSheet(CaptionExelBookLbl, CompanyName, UserId);
+        TempExcelBufTemp.SetColumnWidth('A', 18);
+        TempExcelBufTemp.SetColumnWidth('B', 17);
+    end;
+
+    local procedure ReadExcelbook()
+    begin
+        TempExcelBufTemp.CloseBook();
+        TempExcelBufTemp.OpenExcel();
     end;
 
     local procedure MakeExcelInfo()
@@ -121,7 +115,7 @@ report 50100 "Sales Order to Excel"
         TempExcelBufTemp.ClearNewRow();
     end;
 
-    local procedure MakeExcelDataHeader_SalesHeader()
+    local procedure MakeExcelHeader()
     begin
         TempExcelBufTemp.NewRow();
         TempExcelBufTemp.AddColumn("Sales Header".FieldCaption("Document Type"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
@@ -133,9 +127,8 @@ report 50100 "Sales Order to Excel"
         TempExcelBufTemp.AddColumn("Sales Header".FieldCaption("Posting Description"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
     end;
 
-    local procedure MakeExcelDataHeaderLine_SalesHeader()
+    local procedure MakeExcelHeaderLine()
     begin
-        TempExcelBufTemp.NewRow();
         TempExcelBufTemp.NewRow();
         TempExcelBufTemp.AddColumn("Sales Header"."Document Type", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn("Sales Header"."No.", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
@@ -144,10 +137,10 @@ report 50100 "Sales Order to Excel"
         TempExcelBufTemp.AddColumn("Sales Header"."Sell-to Address", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn("Sales Header"."Sell-to City", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Number);
         TempExcelBufTemp.AddColumn("Sales Header"."Posting Description", false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
-        MakeExcelDataHeaderDocLine_SalesLine();
+        MakeExcelHeaderSalesLine();
     end;
 
-    local procedure MakeExcelDataHeaderDocLine_SalesLine()
+    local procedure MakeExcelHeaderSalesLine()
     begin
         TempExcelBufTemp.NewRow();
         TempExcelBufTemp.AddColumn('', false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
@@ -163,7 +156,7 @@ report 50100 "Sales Order to Excel"
         TempExcelBufTemp.AddColumn("Sales Line".FieldCaption("Shipment Date"), false, '', true, false, true, '', TempExcelBufTemp."Cell Type"::Text);
     end;
 
-    local procedure MakeExcelDataDocLine_SalesLine()
+    local procedure MakeExcelSalesLine()
     begin
         TempExcelBufTemp.NewRow();
         TempExcelBufTemp.AddColumn('', false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
