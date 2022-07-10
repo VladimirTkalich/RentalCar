@@ -6,20 +6,20 @@
             "name": "Microsoft cloud sandbox",
             "request": "launch",
             "type": "al",
-            "server": "http://Test",
-            "serverInstance": "BC",
-            "authentication": "UserPassword",
+            //"server": "http://Test",
+            //"serverInstance": "BC",
+            //"authentication": "UserPassword",
             "environmentType": "Sandbox",
-            "environmentName": "auto",
-            "startupObjectId": 9307,
+            "environmentName": "MyTasks",
+            "startupObjectId": 22,
             "startupObjectType": "Page",
             "schemaUpdateMode": "ForceSync",
             "breakOnError": true,
             "launchBrowser": true,
             "enableLongRunningSqlStatements": true,
             "enableSqlInformationDebugger": true,
-            // "tenant": "48663930-37a7-4483-8d6e-57454fe6b2a6"
-            "tenant": "default"
+            "tenant": "48663930-37a7-4483-8d6e-57454fe6b2a6"
+            //"tenant": "default"
         }
     ]
 }
