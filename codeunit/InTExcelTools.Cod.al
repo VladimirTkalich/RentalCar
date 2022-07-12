@@ -31,4 +31,19 @@ codeunit 50104 "InT_Excel Tools"
             exit(TypeVal);
         end;
     end;
+    // procedure GetTypeOrdinalValue(var Buffer: Record "Excel Buffer" temporary; Col: Integer; Row: Integer): Integer
+    // var
+    //     TypeVal: Enum "Item Type";
+    //     Index: Integer;
+    //     OrdinalValue: Integer;
+    //     TypeName: Text;
+    // begin
+    //     OrdinalValue := -1;
+    //     if Buffer.Get(Row, Col) then begin
+    //         TypeName := Buffer."Cell Value as Text";
+    //         Index := TypeVal.Names.IndexOf(TypeName);
+    //         OrdinalValue := TypeVal.Ordinals.Get(Index);
+    //         exit(OrdinalValue);
+    //     end;
+    // end;
 }

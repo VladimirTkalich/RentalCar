@@ -66,6 +66,7 @@ page 50102 "InT_Excel Import"
                     Filename: Text;
                     Row: Integer;
                     LastRow: Integer;
+                // OriginalVal: Integer;
                 begin
                     if UploadIntoStream('Select file to import', '', '', Filename, InS) then begin
                         Buffer.OpenBookStream(InS, 'Items');
@@ -84,6 +85,9 @@ page 50102 "InT_Excel Import"
                             Data."No." := x.GetText(Buffer, 1, Row);
                             Data.Description := x.GetText(Buffer, 2, Row);
                             Data."Base Unit of Measure" := x.GetText(Buffer, 3, Row);
+                            // OriginalVal := x.GetTypeOrdinalValue(Buffer, 4, Row);
+                            // if OriginalVal <> -1 then
+                            //     Data.Type := Enum::"Item Type".FromInteger(OriginalVal);
                             Data.Type := x.GetType(Buffer, 4, Row);
                             Data."Unit Price" := x.GetDecimal(Buffer, 5, Row);
                             Data."Etc." := x.GetText(Buffer, 6, Row);
