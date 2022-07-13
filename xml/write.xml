@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<XML_Data release="1.1">
+  <Record>
+    <RowID>1</RowID>
+    <FirstName>Vladimir</FirstName>
+    <LastName>Tkalich</LastName>
+  </Record>
+  <Record>
+    <RowID>2</RowID>
+    <FirstName>Ivan</FirstName>
+    <LastName>Tonky</LastName>
+  </Record>
+  <Record>
+    <RowID>3</RowID>
+    <FirstName>Evgen</FirstName>
+    <LastName>Mikhailov</LastName>
+  </Record>
+</XML_Data>

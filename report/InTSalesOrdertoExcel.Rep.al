@@ -22,7 +22,7 @@ report 50100 "InT_Sales Order to Excel"
             var
                 SalesDocumentType: Enum "Sales Document Type";
             begin
-                if "Sales Header"."Document Type" = SalesDocumentType::Order then
+                if "Sales Header"."Document Type" = SalesDocumentType::Order then //TODO Change to filter for dataitem at top dataitem or in trigger OnPreDataItem
                     MakeExcelHeaderLine()
                 else
                     CurrReport.Skip();

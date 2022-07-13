@@ -33,9 +33,10 @@ page 50104 "InT_XML_Data_Page"
     {
         area(Processing)
         {
-            action(ReadXML)
+            action(ReadXMLFile)
             {
-                Caption = 'ReadXML';
+                Caption = 'Read XML File';
+                Image = Import;
                 ApplicationArea = All;
                 Promoted = true;
                 PromotedCategory = Process;
@@ -45,12 +46,28 @@ page 50104 "InT_XML_Data_Page"
                 var
                     Import: Codeunit InT_XML_Data;
                 begin
-                    Import.Import();
+                    Import.ImportFromFile();
+                end;
+            }
+            action(WriteXMLFile)
+            {
+                Caption = 'Write XML File';
+                Image = Export;
+                ApplicationArea = All;
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                PromotedOnly = true;
+                trigger OnAction()
+                var
+                    Export: Codeunit InT_XML_Data;
+                begin
+                    Export.ExportToFile();
                 end;
             }
             action(ClearTable)
             {
-                Caption = 'Cleat Table';
+                Caption = 'Clear Table';
                 Image = Excel;
                 Promoted = true;
                 PromotedCategory = Process;

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<iSAFFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.vmi.lt/cms/imas/isaf">
+  <Header>
+    <FileDescription>
+      <FileVersion>test</FileVersion>
+      <FileDateCreated>2021-09-17T13:15:58</FileDateCreated>
+      <DataType>F</DataType>
+      <SoftwareCompanyName>Microsoft</SoftwareCompanyName>
+      <SoftwareName>Dynamics NAV</SoftwareName>
+      <SoftwareVersion />
+      <RegistrationNumber>111111111</RegistrationNumber>
+      <NumberOfParts>1</NumberOfParts>
+      <PartNumber>1</PartNumber>
+      <SelectionCriteria>
+        <SelectionStartDate>2021-08-01</SelectionStartDate>
+        <SelectionEndDate>2021-08-31</SelectionEndDate>
+      </SelectionCriteria>
+    </FileDescription>
+  </Header>
+  <SourceDocuments>
+    <PurchaseInvoices>
+      <Invoice>
+        <InvoiceNo>44</InvoiceNo>
+        <SupplierInfo>
+          <SupplierID />
+          <VATRegistrationNumber>733495789</VATRegistrationNumber>
+          <RegistrationNumber>ND</RegistrationNumber>
+          <Country>GB</Country>
+          <Name>Deerfield Graphics Company</Name>
+        </SupplierInfo>
+        <InvoiceDate>2021-08-19</InvoiceDate>
+        <InvoiceType>DS</InvoiceType>
+        <SpecialTaxation />
+        <References />
+        <VATPointDate>2021-08-19</VATPointDate>
+        <RegistrationAccountDate>2021-08-19</RegistrationAccountDate>
+        <DocumentTotals>
+          <DocumentTotal>
+            <TaxableValue>-8024.90</TaxableValue>
+            <TaxCode>PVM1</TaxCode>
+            <TaxPercentage>25.00</TaxPercentage>
+            <Amount>-2006.23</Amount>
+          </DocumentTotal>
+        </DocumentTotals>
+      </Invoice>
+    </PurchaseInvoices>
+  </SourceDocuments>
+</iSAFFile>

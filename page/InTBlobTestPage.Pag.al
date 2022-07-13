@@ -1,16 +1,16 @@
 page 50103 "InT_Blob_Test_Page"
 {
     Caption = 'Blob_Test_Page';
-    PageType = Card;
+    PageType = List;
     SourceTable = InT_Blob_Test;
 
     layout
     {
         area(content)
         {
-            group(General)
+            repeater(General)
             {
-                field(PKEY; Rec.PKEY)
+                field(PKEY; Rec."No.")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the PKEY field.';
@@ -19,6 +19,11 @@ page 50103 "InT_Blob_Test_Page"
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the BLOB field.';
+                }
+                field("File Name"; Rec."File Name")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the File Name field.';
                 }
             }
         }
@@ -31,6 +36,7 @@ page 50103 "InT_Blob_Test_Page"
             action(Import)
             {
                 Caption = 'Import';
+                Image = Import;
                 ApplicationArea = All;
                 Promoted = true;
                 PromotedCategory = Process;
@@ -38,22 +44,64 @@ page 50103 "InT_Blob_Test_Page"
                 PromotedOnly = true;
                 trigger OnAction()
                 var
+                    TempBlob: Codeunit "Temp Blob";
+                    TestCU: Codeunit InT_XML_Data;
                     InS: InStream;
                     OutS: OutStream;
-                    Filename: Text;
                 begin
-                    if UploadIntoStream('Select file to import', '', '', Filename, InS) then begin
-                        TempBlob.CreateOutStream(OutS);
-                        CopyStream(OutS, InS);
+                    Rec.Init();
+                    TestCU.ImportBlob(TempBlob, Rec."File Name");
+                    TempBlob.CreateInStream(InS);
+                    Rec.BLOB.CreateOutStream(OutS);
+                    CopyStream(OutS, InS);
+                    Rec.Modify();
 
-
-                        Rec.CalcFields(BLOB);
-                        Rec.BLOB.CreateOutStream(OutS);
-                        TempBlob.CreateInStream(InS);
-                        CopyStream(OutS, InS);
-                    end;
                 end;
             }
+
+            action(Export)
+            {
+                Caption = 'Export';
+                Image = Export;
+                ApplicationArea = All;
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                PromotedOnly = true;
+                trigger OnAction()
+                var
+                    TempBlob: Codeunit "Temp Blob";
+                    TestCU: Codeunit InT_XML_Data;
+                    InS: InStream;
+                    OutS: OutStream;
+                begin
+                    Rec.CalcFields(BLOB);
+                    if Rec.BLOB.HasValue then begin
+                        // Message('BLOB has value');
+                        Rec.BLOB.CreateInStream(InS);
+                        TempBlob.CreateOutStream(OutS);
+                        CopyStream(OutS, InS);
+                        TestCU.ExportBlob(TempBlob, Rec."File Name");
+                    end else
+                        Message('BLOB has not value. Please import first');
+                end;
+            }
+
+            action(ClearTable)
+            {
+                Caption = 'Clear Table';
+                Image = Delete;
+                Promoted = true;
+                PromotedCategory = Process;
+                ApplicationArea = all;
+                trigger OnAction()
+                var
+                    Data: Record InT_Blob_Test;
+                begin
+                    Data.DeleteAll(true);
+                end;
+            }
+
         }
     }
 

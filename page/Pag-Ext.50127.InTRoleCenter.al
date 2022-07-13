@@ -33,6 +33,17 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     RunObject = Report "InT_Sales Order to Excel";
                     ToolTip = 'Sales Order to Excel';
                 }
+                action(InT_XML_File)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'XML r/w File (T12)';
+                    Image = "Report";
+                    Promoted = true;
+                    PromotedCategory = "Report";
+                    PromotedIsBig = true;
+                    RunObject = page "InT_XML_Data_Page";
+                    ToolTip = 'XML r/w File';
+                }
                 action(InT_XML_BLOB)
                 {
                     ApplicationArea = Basic, Suite;
@@ -41,8 +52,7 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     Promoted = true;
                     PromotedCategory = "Report";
                     PromotedIsBig = true;
-                    // RunObject = page "InT_Blob_Test_Page";
-                    RunObject = page "InT_XML_Data_Page";
+                    RunObject = page "InT_Blob_Test_Page";
                     ToolTip = 'XML r/w BLOB';
                 }
                 action(InT_RSC_Excel)

@@ -4,21 +4,27 @@ table 50101 "InT_Blob_Test"
 
     fields
     {
-        field(1; PKEY; Integer)
+        field(1; "No."; Integer)
         {
-            Caption = 'PKEY';
+            Caption = 'No.';
             DataClassification = CustomerContent;
+            // AutoIncrement = true;
         }
         field(2; "BLOB"; Blob)
         {
-            Caption = 'BLOB';
+            Caption = 'BLOB File';
             DataClassification = CustomerContent;
-            SubType = Bitmap;
+            // SubType = Bitmap;
+        }
+        field(3; "File Name"; Text[50])
+        {
+            Caption = 'File Name';
+            DataClassification = CustomerContent;
         }
     }
     keys
     {
-        key(PK; PKEY)
+        key(PK; "No.")
         {
             Clustered = true;
         }
