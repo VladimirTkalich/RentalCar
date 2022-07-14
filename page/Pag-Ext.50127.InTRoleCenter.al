@@ -22,6 +22,17 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     RunObject = Report "InT_Vendor Detailed Aging";
                     ToolTip = 'Excel Report';
                 }
+                action(InT_XMLPort_Export)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'XMLPort Export (T4)';
+                    Image = "Report";
+                    Promoted = true;
+                    PromotedCategory = "Report";
+                    PromotedIsBig = true;
+                    RunObject = xmlport InT_XMLPort_Export;
+                    ToolTip = 'XMLPort Export';
+                }
                 action(InT_SalesOrder_Excel)
                 {
                     ApplicationArea = Basic, Suite;
