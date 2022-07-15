@@ -1,0 +1,872 @@
+OBJECT Report 50051 Vendor Detailed Aging
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20.01.29;
+    Time=10:24:27;
+    Modified=Yes;
+    Version List=NAVW14.00,NAVHU5.00.01,CPS01.00,CPP01.00,MMBF01.00;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Vendor Detailed Aging;
+               HUN=Sz†ll°t¢ - r?szletes koros°t¢ lista];
+    TopMargin=1200;
+    BottomMargin=1200;
+    LeftMargin=900;
+    OnInitReport=BEGIN
+                   GLSetup.GET;
+                 END;
+
+    OnPreReport=BEGIN
+                  VendFilter := Vendor.GETFILTERS;
+
+                  IF CreateExcel THEN BEGIN
+                    CREATE(xlApp);
+                    xlBook := xlApp.Workbooks.Add(-4167);
+
+                    xlSheet2 := xlApp.ActiveSheet;
+                    xlSheet2.Name := 'Settings';
+                    xlSheet2.Range('a1').Value :=  'Settings';
+                    xlSheet2.Range('a1').Font.Bold := TRUE;
+                    xlSheet2.Range('a3').Value :=  'End date';
+                    xlSheet2.Range('a4').Value :=  'Display only open items';
+                    xlSheet2.Range('a10').Value := 'Significantly created';
+                    xlSheet2.Range('a11').Value := 'Significant creation date';
+                    xlSheet2.Range('b3').Value :=  EndDate;
+                    xlSheet2.Range('b4').Value :=  OnlyOpen;
+                    xlSheet2.Range('b10').Value := USERID;
+                    xlSheet2.Range('b11').Value := TODAY;
+
+                    xlApp.Sheets.Add;
+
+                    xlSheet := xlApp.ActiveSheet;
+                    xlSheet.Name := 'Carrier - Parts disease. list';
+                    xlSheet.Range('A1').Value := STRSUBSTNO('%1','Vendor number');
+                    xlSheet.Range('B1').Value := STRSUBSTNO('%1','Name of the supplier');
+                    xlSheet.Range('C1').Value := STRSUBSTNO('%1','Wag the date');
+                    xlSheet.Range('D1').Value := STRSUBSTNO('%1','Certification No.');
+                    xlSheet.Range('E1').Value := STRSUBSTNO('%1','Megnevezs');
+                    xlSheet.Range('F1').Value := STRSUBSTNO('%1','Payment deadline?');
+                    xlSheet.Range('G1').Value := STRSUBSTNO('%1','Time (days)');
+                    xlSheet.Range('H1').Value := STRSUBSTNO('%1','Pnznemkd');
+                    xlSheet.Range('I1').Value := STRSUBSTNO('%1','Original amount');
+                    xlSheet.Range('J1').Value := STRSUBSTNO('%1','Htralk');
+                    xlSheet.Range('K1').Value := STRSUBSTNO('%1','Backwards (SPN)');
+                    xlSheet.Range('A1..K1').Font.Bold := TRUE;
+                    xlLineNo := 2;
+                  END;
+                END;
+
+    OnPostReport=BEGIN
+                   IF CreateExcel THEN
+                     xlApp.Visible := TRUE;
+                 END;
+
+  }
+  DATAITEMS
+  {
+    { PROPERTIES
+      {
+        DataItemTable=Table23;
+        PrintOnlyIfDetail=Yes;
+        OnPreDataItem=BEGIN
+                        CurrReport.CREATETOTALS("Vendor Ledger Entry"."Remaining Amt. (LCY)");
+                      END;
+
+        ReqFilterFields=No.,Vendor Posting Group,Currency Filter,Payment Terms Code;
+      }
+      SECTIONS
+      {
+        { PROPERTIES
+          {
+            SectionType=Header;
+            PrintOnEveryPage=Yes;
+            SectionWidth=19350;
+            SectionHeight=1692;
+          }
+          CONTROLS
+          {
+            { 1   ;Label        ;0    ;0    ;7500 ;423  ;FontSize=8;
+                                                         FontBold=Yes;
+                                                         CaptionML=[ENU=Vendor Detailed Aging;
+                                                                    HUN=Sz†ll°t¢ - r?szletes koros°t¢ lista] }
+            { 2   ;TextBox      ;16200;0    ;3150 ;423  ;HorzAlign=Right;
+                                                         SourceExpr=FORMAT(TODAY,0,4) }
+            { 3   ;TextBox      ;0    ;423  ;7500 ;423  ;SourceExpr=STRSUBSTNO(Text000,FORMAT(EndDate)) }
+            { 4   ;Label        ;18150;423  ;750  ;423  ;ParentControl=5 }
+            { 5   ;TextBox      ;18900;423  ;450  ;423  ;CaptionML=[ENU=Page;
+                                                                    HUN=Oldal:];
+                                                         SourceExpr=CurrReport.PAGENO }
+            { 6   ;TextBox      ;0    ;846  ;4500 ;423  ;SourceExpr=COMPANYNAME }
+            { 7   ;TextBox      ;17850;846  ;1500 ;423  ;HorzAlign=Right;
+                                                         SourceExpr=USERID }
+          }
+           }
+        { PROPERTIES
+          {
+            SectionType=Header;
+            PrintOnEveryPage=Yes;
+            SectionWidth=19350;
+            SectionHeight=846;
+            OnPreSection=BEGIN
+                           CurrReport.SHOWOUTPUT((CurrReport.PAGENO = 1) AND (VendFilter <> ''));
+                         END;
+
+          }
+          CONTROLS
+          {
+            { 8   ;TextBox      ;0    ;0    ;18150;423  ;SourceExpr=Vendor.TABLECAPTION + ': ' + VendFilter }
+          }
+           }
+        { PROPERTIES
+          {
+            SectionType=Header;
+            PrintOnEveryPage=Yes;
+            SectionWidth=19350;
+            SectionHeight=1269;
+          }
+          CONTROLS
+          {
+            { 9   ;Label        ;0    ;0    ;1200 ;846  ;ParentControl=23;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 10  ;Label        ;1350 ;0    ;2100 ;846  ;ParentControl=24;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 11  ;Label        ;3600 ;0    ;4050 ;846  ;ParentControl=25;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 12  ;Label        ;7800 ;0    ;1050 ;846  ;ParentControl=26;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 13  ;Label        ;9000 ;0    ;1050 ;846  ;ParentControl=1360002;
+                                                         HorzAlign=Right;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 14  ;Label        ;13050;0    ;2100 ;846  ;ParentControl=28;
+                                                         HorzAlign=Right;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 20  ;Label        ;10200;0    ;750  ;846  ;ParentControl=19;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 32  ;Label        ;15300;0    ;2100 ;846  ;ParentControl=31;
+                                                         HorzAlign=Right;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 1360000;Label     ;11100;0    ;1800 ;846  ;ParentControl=1360001;
+                                                         HorzAlign=Right;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+            { 1000000001;Label  ;17550;0    ;1800 ;846  ;ParentControl=1000000000;
+                                                         VertAlign=Bottom;
+                                                         FontBold=Yes;
+                                                         MultiLine=Yes }
+          }
+           }
+        { PROPERTIES
+          {
+            SectionType=Body;
+            SectionWidth=19350;
+            SectionHeight=846;
+          }
+          CONTROLS
+          {
+            { 15  ;TextBox      ;0    ;423  ;1500 ;423  ;FontBold=Yes;
+                                                         SourceExpr="No." }
+            { 16  ;TextBox      ;1650 ;423  ;4500 ;423  ;FontBold=Yes;
+                                                         SourceExpr=Name }
+          }
+           }
+        { PROPERTIES
+          {
+            SectionType=Footer;
+            SectionWidth=19350;
+            SectionHeight=423;
+          }
+          CONTROLS
+          {
+          }
+           }
+      }
+       }
+    { PROPERTIES
+      {
+        DataItemIndent=1;
+        DataItemTable=Table25;
+        DataItemTableView=SORTING(Vendor No.,Posting Date,Currency Code);
+        OnPreDataItem=BEGIN
+                        IF OnlyOpen THEN BEGIN
+                           SETRANGE(Open,TRUE);
+                        //   SETRANGE("Due Date",0D,EndDate);
+                           SETRANGE("Posting Date",0D,EndDate);
+                        END ELSE
+                        //   SETRANGE("Due Date",0D,EndDate);
+                           SETRANGE("Posting Date",0D,EndDate);
+                        CurrReport.CREATETOTALS("Remaining Amount","Remaining Amt. (LCY)");
+                        Counter := 0;
+                      END;
+
+        OnAfterGetRecord=BEGIN
+                           IF "Due Date" = 0D THEN
+                             OverDueDays := 0
+                           ELSE
+                             OverDueDays := EndDate - "Due Date";
+                           SETRANGE("Date Filter",0D,EndDate);
+                           CALCFIELDS("Remaining Amount","Remaining Amt. (LCY)");
+                           IF "Remaining Amount" = 0 THEN
+                             CurrReport.SKIP;
+                           //+NMP01
+                           IF "Currency Code" = '' THEN BEGIN
+                             //+NPZS01
+                             //  "Currency Code" := GLSetup."LCY Code";
+                             CurrCode := GLSetup."LCY Code";
+                           END ELSE BEGIN
+                             CurrCode := "Currency Code";
+                             //-NPZS01
+                           END;
+                           //-NMP01
+                           CurrencyTotalBuffer.UpdateTotal(
+                             "Currency Code","Remaining Amount","Remaining Amt. (LCY)",Counter);
+                         END;
+
+        ReqFilterFields=Vendor Posting Group;
+        DataItemLink=Vendor No.=FIELD(No.),
+                     Global Dimension 2 Code=FIELD(Global Dimension 2 Filter),
+                     Global Dimension 1 Code=FIELD(Global Dimension 1 Filter),
+                     Currency Code=FIELD(Currency Filter),
+                     Date Filter=FIELD(Date Filter);
+      }
+      SECTIONS
+      {
+        { PROPERTIES
+          {
+            SectionType=Body;
+            SectionWidth=19350;
+            SectionHeight=423;
+            OnPreSection=BEGIN
+                           IF CreateExcel THEN BEGIN
+
+                             xlSheet.Range('A' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', Vendor."No.");
+                             xlSheet.Range('B' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', Vendor.Name);
+                             xlSheet.Range('C' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', "Posting Date");
+                             xlSheet.Range('D' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', "Document No.");
+                             xlSheet.Range('E' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', Description);
+                             xlSheet.Range('F' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', "Due Date");
+                             xlSheet.Range('G' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', OverDueDays);
+                             xlSheet.Range('H' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', "Currency Code");
+                             xlSheet.Range('I' + FORMAT(xlLineNo)).Value := FORMAT("Original Amount", 0, '<Precision,2:2><Sign><Integer><Decimals>');
+                             xlSheet.Range('J' + FORMAT(xlLineNo)).Value := FORMAT("Remaining Amount", 0, '<Precision,2:2><Sign><Integer><Decimals>');
+                             xlSheet.Range('K' + FORMAT(xlLineNo)).Value := FORMAT("Remaining Amt. (LCY)", 0, '<Precision,2:2><Sign><Integer><Decimals>');
+                             xlLineNo += 1;
+                           END;
+                         END;
+
+          }
+          CONTROLS
+          {
+            { 23  ;TextBox      ;0    ;0    ;1200 ;423  ;SourceExpr="Posting Date" }
+            { 24  ;TextBox      ;1350 ;0    ;2100 ;423  ;SourceExpr="Document No." }
+            { 25  ;TextBox      ;3600 ;0    ;4050 ;423  ;SourceExpr=Description }
+            { 26  ;TextBox      ;7800 ;0    ;1050 ;423  ;CaptionML=[ENU=Due Date;
+                                                                    HUN=Fizet?si hat†rid?];
+                                                         SourceExpr="Due Date" }
+            { 1360002;TextBox   ;9000 ;0    ;1050 ;423  ;CaptionML=[ENU=Days Due;
+                                                                    HUN=K?s?s ideje (nap)];
+                                                         SourceExpr=OverDueDays;
+                                                         AutoFormatType=1;
+                                                         AutoFormatExpr="Currency Code" }
+            { 28  ;TextBox      ;13050;0    ;2100 ;423  ;SourceExpr="Remaining Amount";
+                                                         AutoFormatType=1;
+                                                         AutoFormatExpr="Currency Code" }
+            { 19  ;TextBox      ;10200;0    ;750  ;423  ;CaptionML=[ENU=Currency Code;
+                                                                    HUN=P?nznemk¢d];
+                                                         SourceExpr=CurrCode }
+            { 31  ;TextBox      ;15300;0    ;2100 ;423  ;SourceExpr="Remaining Amt. (LCY)";
+                                                         AutoFormatType=1 }
+            { 1360001;TextBox   ;11100;0    ;1800 ;423  ;SourceExpr="Original Amount" }
+            { 1000000000;TextBox;17550;0    ;1800 ;423  ;SourceExpr="External Document No." }
+          }
+           }
+      }
+       }
+    { PROPERTIES
+      {
+        DataItemIndent=1;
+        DataItemTable=Table2000000026;
+        DataItemTableView=SORTING(Number)
+                          WHERE(Number=FILTER(1..));
+        OnAfterGetRecord=BEGIN
+                           IF Number = 1 THEN
+                             OK := CurrencyTotalBuffer.FIND('-')
+                           ELSE
+                             OK := CurrencyTotalBuffer.NEXT <> 0;
+                           IF NOT OK THEN
+                             CurrReport.BREAK;
+                           CurrencyTotalBuffer2.UpdateTotal(
+                             CurrencyTotalBuffer."Currency Code",
+                             CurrencyTotalBuffer."Total Amount",
+                             CurrencyTotalBuffer."Total Amount (LCY)",Counter1);
+                         END;
+
+        OnPostDataItem=BEGIN
+                         CurrencyTotalBuffer.DELETEALL;
+                       END;
+
+      }
+      SECTIONS
+      {
+        { PROPERTIES
+          {
+            SectionType=Body;
+            SectionWidth=19350;
+            SectionHeight=423;
+            OnPreSection=BEGIN
+                           //LJJ02+
+                             IF CreateExcel THEN BEGIN
+                              xlSheet.Range('A' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', Vendor."No.");
+                              xlSheet.Range('A' + FORMAT(xlLineNo)).Font.Bold := TRUE;
+                              xlSheet.Range('B' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', Vendor.Name);
+                              xlSheet.Range('B' + FORMAT(xlLineNo)).Font.Bold := TRUE;
+                              xlSheet.Range('H' + FORMAT(xlLineNo)).Value := STRSUBSTNO('%1', CurrencyTotalBuffer."Currency Code");
+                              xlSheet.Range('H' + FORMAT(xlLineNo)).Font.Bold := TRUE;
+                              xlSheet.Range('J' + FORMAT(xlLineNo)).Value := FORMAT(CurrencyTotalBuffer."Total Amount",0,
+                              '<Precision,2:2><Sign><Integer><Decimals>');
+                              xlSheet.Range('J' + FORMAT(xlLineNo)).Font.Bold := TRUE;
+                              xlSheet.Range('K' + FORMAT(xlLineNo)).Value := FORMAT(CurrencyTotalBuffer."Total Amount (LCY)",0,
+                              '<Precision,2:2><Sign><Integer><Decimals>');
+                              xlSheet.Range('K' + FORMAT(xlLineNo)).Font.Bold := TRUE;
+
+                              xlLineNo += 1;
+                             END;
+                           //LJJ02-
+                         END;
+
+          }
+          CONTROLS
+          {
+            { 34  ;TextBox      ;13050;0    ;2100 ;423  ;FontBold=Yes;
+                                                         SourceExpr=CurrencyTotalBuffer."Total Amount";
+                                                         AutoFormatType=1;
+                                                         AutoFormatExpr=CurrencyTotalBuffer."Currency Code" }
+            { 35  ;TextBox      ;10200;0    ;750  ;423  ;FontBold=Yes;
+                                                         SourceExpr=CurrencyTotalBuffer."Currency Code" }
+            { 30  ;TextBox      ;1650 ;0    ;4500 ;423  ;FontBold=Yes;
+                                                         SourceExpr=Vendor.Name }
+            { 29  ;TextBox      ;15300;0    ;2100 ;423  ;FontBold=Yes;
+                                                         SourceExpr=CurrencyTotalBuffer."Total Amount (LCY)";
+                                                         AutoFormatType=1 }
+          }
+           }
+        { PROPERTIES
+          {
+            SectionType=Footer;
+            SectionWidth=19350;
+            SectionHeight=423;
+            OnPostSection=BEGIN
+                            CurrReport.SHOWOUTPUT(Counter <> 1);
+                          END;
+
+          }
+          CONTROLS
+          {
+            { 33  ;TextBox      ;15300;0    ;2100 ;423  ;FontBold=Yes;
+                                                         SourceExpr="Vendor Ledger Entry"."Remaining Amt. (LCY)";
+                                                         AutoFormatType=1 }
+          }
+           }
+      }
+       }
+    { PROPERTIES
+      {
+        DataItemTable=Table2000000026;
+        DataItemTableView=SORTING(Number)
+                          WHERE(Number=FILTER(1..));
+        DataItemVarName=Integer2;
+        OnAfterGetRecord=BEGIN
+                           IF Number = 1 THEN
+                             OK := CurrencyTotalBuffer2.FIND('-')
+                           ELSE
+                             OK := CurrencyTotalBuffer2.NEXT <> 0;
+                           IF NOT OK THEN
+                             CurrReport.BREAK;
+                         END;
+
+        OnPostDataItem=BEGIN
+                         CurrencyTotalBuffer2.DELETEALL;
+                       END;
+
+      }
+      SECTIONS
+      {
+        { PROPERTIES
+          {
+            SectionType=Body;
+            SectionWidth=19350;
+            SectionHeight=423;
+            OnPreSection=BEGIN
+                           //+LSM02 091127
+                           IF CreateExcel THEN BEGIN
+                             xlSheet.Range('A' + FORMAT(xlLineNo)).Value := 'Total:';
+                           //LJJ02+
+                             xlSheet.Range('h' + FORMAT(xlLineNo)).Value := FORMAT(CurrencyTotalBuffer2."Currency Code");
+                           //LJJ02-
+                             xlSheet.Range('J' + FORMAT(xlLineNo)).Value := FORMAT(CurrencyTotalBuffer2."Total Amount",
+                               0, '<Precision,2:2><Sign><Integer><Decimals>');
+                             xlSheet.Range('K' + FORMAT(xlLineNo)).Value := FORMAT(CurrencyTotalBuffer2."Total Amount (LCY)",
+                               0, '<Precision,2:2><Sign><Integer><Decimals>');
+                             xlLineNo += 1;
+                           END;
+                           //-LSM02 091127
+                         END;
+
+          }
+          CONTROLS
+          {
+            { 38  ;TextBox      ;10200;0    ;750  ;423  ;FontBold=Yes;
+                                                         SourceExpr=CurrencyTotalBuffer2."Currency Code" }
+            { 39  ;TextBox      ;13050;0    ;2100 ;423  ;FontBold=Yes;
+                                                         SourceExpr=CurrencyTotalBuffer2."Total Amount";
+                                                         AutoFormatType=1;
+                                                         AutoFormatExpr=CurrencyTotalBuffer."Currency Code" }
+            { 36  ;TextBox      ;15300;0    ;2100 ;423  ;FontBold=Yes;
+                                                         SourceExpr=CurrencyTotalBuffer2."Total Amount (LCY)";
+                                                         AutoFormatType=1 }
+            { 21  ;Label        ;0    ;0    ;2250 ;423  ;FontBold=Yes;
+                                                         CaptionML=[ENU=Total;
+                                                                    HUN=?sszesen] }
+          }
+           }
+        { PROPERTIES
+          {
+            SectionType=Footer;
+            SectionWidth=19350;
+            SectionHeight=423;
+          }
+          CONTROLS
+          {
+            { 22  ;TextBox      ;15300;0    ;2100 ;423  ;FontBold=Yes;
+                                                         SourceExpr="Vendor Ledger Entry"."Remaining Amt. (LCY)";
+                                                         AutoFormatType=1 }
+          }
+           }
+      }
+       }
+  }
+  REQUESTFORM
+  {
+    PROPERTIES
+    {
+      Width=6160;
+      Height=1980;
+      SaveValues=Yes;
+      OnOpenForm=BEGIN
+                   IF EndDate = 0D THEN
+                     EndDate := WORKDATE;
+                 END;
+
+    }
+    CONTROLS
+    {
+      { 1   ;TextBox      ;4400 ;0    ;1650 ;440  ;Name=Ending Date;
+                                                   InPage=-1;
+                                                   CaptionML=[ENU=Ending Date;
+                                                              HUN=Befejez?si d†tum];
+                                                   SourceExpr=EndDate }
+      { 21  ;Label        ;0    ;0    ;4290 ;440  ;ParentControl=1;
+                                                   InPage=-1 }
+      { 2   ;Label        ;0    ;550  ;4290 ;440  ;ParentControl=3;
+                                                   InPage=-1 }
+      { 3   ;CheckBox     ;4400 ;550  ;440  ;440  ;InPage=-1;
+                                                   ShowCaption=No;
+                                                   CaptionML=[ENU=Show Open Entries Only;
+                                                              HUN=Csak nyitott t?telek megjelen.];
+                                                   SourceExpr=OnlyOpen }
+      { 1000000000;Label  ;0    ;1100 ;4290 ;440  ;ParentControl=1000000001;
+                                                   InPage=-1;
+                                                   CaptionML=HUN=Export†l†s Excelbe }
+      { 1000000001;CheckBox;4400;1100 ;440  ;440  ;InPage=-1;
+                                                   ShowCaption=No;
+                                                   CaptionML=[ENU=Show Open Entries Only;
+                                                              HUN=Csak nyitott t?telek megjelen.];
+                                                   SourceExpr=CreateExcel }
+    }
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      Text000@1000 : TextConst 'ENU=As of %1;HUN=D†tum: %1';
+      CurrencyTotalBuffer@1001 : TEMPORARY Record 332;
+      CurrencyTotalBuffer2@1002 : TEMPORARY Record 332;
+      EndDate@1003 : Date;
+      VendFilter@1004 : Text[250];
+      OverDueDays@1360000 : Integer;
+      OK@1006 : Boolean;
+      Counter@1007 : Integer;
+      Counter1@1008 : Integer;
+      OnlyOpen@1009 : Boolean;
+      xlApp@1000000006 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{00024500-0000-0000-C000-000000000046}:Unknown Automation Server.Application";
+      xlBook@1000000005 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";
+      xlSheet@1000000004 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{00020820-0000-0000-C000-000000000046}:Unknown Automation Server.Worksheet";
+      xlRange@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";
+      xlFont@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{0002084D-0000-0000-C000-000000000046}:Unknown Automation Server.Font";
+      xlLineNo@1000000001 : Integer;
+      CreateExcel@1000000000 : Boolean;
+      xlSheet2@1000000007 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{00020820-0000-0000-C000-000000000046}:Unknown Automation Server.Worksheet";
+      xlRange2@1000000008 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";
+      xlFont2@1000000009 : Automation "{00020813-0000-0000-C000-000000000046} 1.2:{0002084D-0000-0000-C000-000000000046}:Unknown Automation Server.Font";
+      GLSetup@1000000010 : Record 98;
+      CurrCode@1000000011 : Code[10];
+
+    EVENT xlSheet@1000000004::SelectionChange@1543(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::BeforeDoubleClick@1537(Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::BeforeRightClick@1534(Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::Activate@304();
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::Deactivate@1530();
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::Calculate@279();
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::Change@1545(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::FollowHyperlink@1470(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00024431-0000-0000-C000-000000000046}:Unknown Automation Server.Hyperlink");
+    BEGIN
+    END;
+
+    EVENT xlSheet@1000000004::PivotTableUpdate@2156(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::Open@1923();
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::Activate@304();
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::Deactivate@1530();
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::BeforeClose@1546(VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::BeforeSave@1547(SaveAsUI@1000000001 : Boolean;VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::BeforePrint@1549(VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::NewSheet@1550(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::AddinInstall@1552();
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::AddinUninstall@1553();
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::WindowResize@1554(Wn@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020893-0000-0000-C000-000000000046}:Unknown Automation Server.Window");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::WindowActivate@1556(Wn@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020893-0000-0000-C000-000000000046}:Unknown Automation Server.Window");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::WindowDeactivate@1557(Wn@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020893-0000-0000-C000-000000000046}:Unknown Automation Server.Window");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetSelectionChange@1558(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetBeforeDoubleClick@1559(Sh@1000000002 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetBeforeRightClick@1560(Sh@1000000002 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetActivate@1561(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetDeactivate@1562(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetCalculate@1563(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetChange@1564(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetFollowHyperlink@1854(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00024431-0000-0000-C000-000000000046}:Unknown Automation Server.Hyperlink");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::SheetPivotTableUpdate@2157(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::PivotTableCloseConnection@2158(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::PivotTableOpenConnection@2159(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::Sync@2266(SyncEventType@1000000000 : Integer);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::BeforeXmlImport@2283(Map@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";Url@1000000002 : Text[1024];IsRefresh@1000000001 : Boolean;VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::AfterXmlImport@2285(Map@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";IsRefresh@1000000001 : Boolean;Result@1000000000 : Integer);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::BeforeXmlExport@2287(Map@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";Url@1000000001 : Text[1024];VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::AfterXmlExport@2288(Map@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";Url@1000000001 : Text[1024];Result@1000000000 : Integer);
+    BEGIN
+    END;
+
+    EVENT xlBook@1000000005::RowsetComplete@2610(Description@1000000002 : Text[1024];Sheet@1000000001 : Text[1024];Success@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::NewWorkbook@1565(Wb@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetSelectionChange@1558(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetBeforeDoubleClick@1559(Sh@1000000002 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetBeforeRightClick@1560(Sh@1000000002 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetActivate@1561(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetDeactivate@1562(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetCalculate@1563(Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetChange@1564(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookOpen@1567(Wb@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookActivate@1568(Wb@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookDeactivate@1569(Wb@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookBeforeClose@1570(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookBeforeSave@1571(Wb@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";SaveAsUI@1000000001 : Boolean;VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookBeforePrint@1572(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookNewSheet@1573(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Sh@1000000000 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookAddinInstall@1574(Wb@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookAddinUninstall@1575(Wb@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WindowResize@1554(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Wn@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020893-0000-0000-C000-000000000046}:Unknown Automation Server.Window");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WindowActivate@1556(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Wn@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020893-0000-0000-C000-000000000046}:Unknown Automation Server.Window");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WindowDeactivate@1557(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Wn@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020893-0000-0000-C000-000000000046}:Unknown Automation Server.Window");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetFollowHyperlink@1854(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00024431-0000-0000-C000-000000000046}:Unknown Automation Server.Hyperlink");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::SheetPivotTableUpdate@2157(Sh@1000000001 : Automation ":{00020400-0000-0000-C000-000000000046}:''.IDISPATCH";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookPivotTableCloseConnect@2160(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookPivotTableOpenConnecti@2161(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookSync@2289(Wb@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";SyncEventType@1000000000 : Integer);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookBeforeXmlImport@2290(Wb@1000000004 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Map@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";Url@1000000002 : Text[1024];IsRefresh@1000000001 : Boolean;VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookAfterXmlImport@2291(Wb@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Map@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";IsRefresh@1000000001 : Boolean;Result@1000000000 : Integer);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookBeforeXmlExport@2292(Wb@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Map@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";Url@1000000001 : Text[1024];VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookAfterXmlExport@2293(Wb@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Map@1000000002 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{0002447B-0000-0000-C000-000000000046}:Unknown Automation Server.XmlMap";Url@1000000001 : Text[1024];Result@1000000000 : Integer);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::WorkbookRowsetComplete@2611(Wb@1000000003 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020819-0000-0000-C000-000000000046}:Unknown Automation Server.Workbook";Description@1000000002 : Text[1024];Sheet@1000000001 : Text[1024];Success@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlApp@1000000006::AfterCalculate@2612();
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::SelectionChange@1543(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::BeforeDoubleClick@1537(Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::BeforeRightClick@1534(Target@1000000001 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range";VAR Cancel@1000000000 : Boolean);
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::Activate@304();
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::Deactivate@1530();
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::Calculate@279();
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::Change@1545(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020846-0000-0000-C000-000000000046}:Unknown Automation Server.Range");
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::FollowHyperlink@1470(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00024431-0000-0000-C000-000000000046}:Unknown Automation Server.Hyperlink");
+    BEGIN
+    END;
+
+    EVENT xlSheet2@1000000007::PivotTableUpdate@2156(Target@1000000000 : Automation "{00020813-0000-0000-C000-000000000046} 1.6:{00020872-0000-0000-C000-000000000046}:Unknown Automation Server.PivotTable");
+    BEGIN
+    END;
+
+    BEGIN
+    {
+      NJJ01 - NSO, Jambrik J†nos - 2011.08.24., CPS01.00
+        Bizonylatsz†m meghosszabb°t†sa
+        Riport l?trehoz†sa 106-os riportb¢l
+
+      NJJ02 - NSO, Jambrik J†nos - 2012.01.31., CPP01.00
+        KÅls? bizonylatsz†m
+
+      NMP01 - NSO, Peter Majer, 2014.12.23 9:10, MMBF01.00, MMBF-20
+        ?res helyett HUF megjelen°t?se
+
+      NPZS01 - NSO, Prazs†k Zsolt, 2015.01.22, MMBF01.00, MMBF-27
+    }
+    END.
+  }
+  RDLDATA
+  {
+  }
+}
+
