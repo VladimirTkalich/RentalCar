@@ -19,7 +19,7 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     Promoted = true;
                     PromotedCategory = "Report";
                     PromotedIsBig = true;
-                    RunObject = Report "InT_Vendor Detailed Aging";
+                    RunObject = Report "Vendor Detailed Aging";
                     ToolTip = 'Excel Report';
                 }
                 action(InT_XMLPort_Export)
@@ -43,6 +43,17 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     PromotedIsBig = true;
                     RunObject = Report "InT_Sales Order to Excel";
                     ToolTip = 'Sales Order to Excel';
+                }
+                action(InT_Inventory_List)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Inventory - List (T8)';
+                    Image = "Report";
+                    Promoted = true;
+                    PromotedCategory = "Report";
+                    PromotedIsBig = true;
+                    RunObject = Report "Inventory - List";
+                    ToolTip = 'Inventory - List';
                 }
                 action(InT_XML_File)
                 {
@@ -88,11 +99,17 @@ pageextension 50127 "InT_Role_Center" extends "Business Manager Role Center" //"
                     RunObject = Report InT_Excel_Export;
                     ToolTip = 'Excel Export';
                 }
-                // action("InT_RSC_Rental Cars")
-                // {
-                //     RunObject = page "Item List"; //tvvRentalCarList;
-                //     ApplicationArea = All;
-                // }
+                action(InT_Import_Sales_Quote)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Import Sales Quote (AT 2)';
+                    Image = "Report";
+                    Promoted = true;
+                    PromotedCategory = "Report";
+                    PromotedIsBig = true;
+                    RunObject = page "Sales Quote";
+                    ToolTip = 'Import Sales Quote';
+                }
             }
         }
     }
