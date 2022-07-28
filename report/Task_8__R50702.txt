@@ -1,0 +1,2491 @@
+OBJECT Report 50702 Inventory - List
+{
+  OBJECT-PROPERTIES
+  {
+    Date=02/05/20;
+    Time=15:41:47;
+    Modified=Yes;
+    Version List=NAVW110.0,NSO01.00,CPP01.00,NIS01.00,MMBF01.01,SWP.1;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Inventory - List;
+               HUN=K‚szlet - lista];
+    OnInitReport=BEGIN
+                   ShowOnlyItemsWithInventory:=TRUE;
+                   ShowLocations := TRUE;
+                   ShowPurchasePrice:=TRUE;
+
+                   TotalPurchase:=0;
+                   TotalNAGYKER:=0;
+                 END;
+
+  }
+  DATASET
+  {
+    { 8129;    ;DataItem;                    ;
+               DataItemTable=Table27;
+               DataItemTableView=SORTING(No.)
+                                 WHERE(Type=CONST(Inventory));
+               ReqFilterHeadingML=[ENU=Item Filter;
+                                   HUN=Cikk szûr‚s];
+               OnPreDataItem=BEGIN
+                               IF (GETFILTER("Date Filter") = '') THEN BEGIN
+                                 SETFILTER("Date Filter", '..%1', WORKDATE);
+                               END;
+
+                               DateFilter:=GETRANGEMAX("Date Filter");
+
+                               IF ShowOnlyItemsWithInventory THEN
+                                  Item.SETFILTER("Net Change",'<>0');
+
+                               raktar:=Item.GETFILTER("Location Filter");
+
+                               ItemFilter := Item.GETFILTERS;
+                             END;
+
+               OnAfterGetRecord=VAR
+                                  bShow@1001 : Boolean;
+                                  decW@1000 : Decimal;
+                                BEGIN
+                                  CLEAR(vendor);
+                                  vendor.RESET;
+                                  IF vendor.GET(Item."Vendor No.") THEN;
+
+                                  CALCFIELDS("Net Change");
+                                  CALCFIELDS(Inventory);
+                                  //CALCFIELDS("Receipt (Qty.)");
+                                  //CALCFIELDS("Shipped (Qty.)");
+
+                                  IF ShowOnlyItemsWithInventory THEN BEGIN
+                                     IF ("Net Change" = 0) AND ("Qty. on Sales Order" =0) THEN
+                                      CurrReport.SKIP;
+                                       END;
+
+                                  PurchasePrice:=0;
+                                  NAGYKERPrice :=0;
+                                  CikkErtek:=0;
+
+                                  PurchasePrice:=Item."Last Direct Cost";
+                                  NAGYKERPrice :=Item."Unit Price";
+
+                                  ValuePurchasePrice := PurchasePrice * Item."Net Change";
+
+                                  CikkErtek:=0;
+
+                                  CLEAR(VE);
+                                  VE.RESET;
+
+                                  VE.SETCURRENTKEY("Item No.",
+                                                   "Posting Date",
+                                                   "Item Ledger Entry Type",
+                                                   "Entry Type",
+                                                   "Variance Type",
+                                                   "Item Charge No.",
+                                                   "Location Code",
+                                                   "Variant Code");
+                                  VE.SETRANGE("Item No.","No.");
+                                  VE.SETFILTER("Posting Date",'..%1',DateFilter);
+                                  VE.SETFILTER("Location Code",raktar);
+                                  VE.CALCSUMS("Cost Amount (Actual)","Invoiced Quantity");
+                                  IF VE."Invoiced Quantity"<>0 THEN
+                                    ItemCost:=VE."Cost Amount (Actual)"/VE."Invoiced Quantity"
+                                  ELSE BEGIN
+                                    IF VE.FINDFIRST THEN
+                                     ItemCost:=VE."Cost per Unit";
+                                  END;
+                                    CikkErtek+=ItemCost*VE."Invoiced Quantity";
+
+                                  TotalPurchase += ValuePurchasePrice;
+                                  TotalFIFOertek += CikkErtek;
+
+                                  CLEAR(ItemSales);
+                                  ItemSales.RESET;
+                                  ItemSales.SETFILTER("Location Filter", raktar);
+                                  IF ItemSales.GET("No.") THEN BEGIN
+                                    ItemSales.CALCFIELDS("Qty. on Sales Order");
+                                    "Qty. on Sales Order" := ItemSales."Qty. on Sales Order";
+                                  END;
+                                END;
+
+               ReqFilterFields=Location Filter,Vendor No.,No.,Date Filter;
+               CalcFields=Inventory,Net Change }
+
+    { 50  ;1   ;Column  ;ShowLocations       ;
+               SourceExpr=ShowLocations }
+
+    { 3   ;1   ;Column  ;CompanyName         ;
+               SourceExpr=COMPANYNAME }
+
+    { 19  ;1   ;Column  ;ItemFilter          ;
+               SourceExpr=ItemFilter }
+
+    { 21  ;1   ;Column  ;No_Item             ;
+               IncludeCaption=Yes;
+               SourceExpr="No." }
+
+    { 22  ;1   ;Column  ;Description_Item    ;
+               IncludeCaption=Yes;
+               SourceExpr=Description }
+
+    { 6   ;1   ;Column  ;Description2_Item   ;
+               SourceExpr="Description 2" }
+
+    { 23  ;1   ;Column  ;AssemblyBOM_Item    ;
+               SourceExpr=FORMAT("Assembly BOM") }
+
+    { 24  ;1   ;Column  ;BaseUnitofMeasure_Item;
+               IncludeCaption=Yes;
+               SourceExpr="Base Unit of Measure" }
+
+    { 25  ;1   ;Column  ;InventoryPostingGrp_Item;
+               IncludeCaption=Yes;
+               SourceExpr="Inventory Posting Group" }
+
+    { 26  ;1   ;Column  ;ShelfNo_Item        ;
+               IncludeCaption=Yes;
+               SourceExpr="Shelf No." }
+
+    { 27  ;1   ;Column  ;VendorItemNo_Item   ;
+               IncludeCaption=Yes;
+               SourceExpr="Vendor Item No." }
+
+    { 28  ;1   ;Column  ;LeadTimeCalculation_Item;
+               IncludeCaption=Yes;
+               SourceExpr="Lead Time Calculation" }
+
+    { 29  ;1   ;Column  ;ReorderPoint_Item   ;
+               IncludeCaption=Yes;
+               SourceExpr="Reorder Point" }
+
+    { 30  ;1   ;Column  ;AlternativeItemNo_Item;
+               IncludeCaption=Yes;
+               SourceExpr="Alternative Item No." }
+
+    { 31  ;1   ;Column  ;Blocked_Item        ;
+               SourceExpr=FORMAT(Blocked) }
+
+    { 1   ;1   ;Column  ;InventoryListCaption;
+               SourceExpr=InventoryListCaptionLbl }
+
+    { 4   ;1   ;Column  ;CurrReportPageNoCaption;
+               SourceExpr=CurrReportPageNoCaptionLbl }
+
+    { 10  ;1   ;Column  ;ItemAssemblyBOMCaption;
+               SourceExpr=ItemAssemblyBOMCaptionLbl }
+
+    { 18  ;1   ;Column  ;ItemBlockedCaption  ;
+               SourceExpr=ItemBlockedCaptionLbl }
+
+    { 5   ;1   ;Column  ;NetChange_Item      ;
+               IncludeCaption=Yes;
+               SourceExpr="Net Change" }
+
+    { 33  ;1   ;Column  ;Inventory_Item      ;
+               IncludeCaption=Yes;
+               SourceExpr=Inventory }
+
+    { 7   ;1   ;Column  ;QtyOnPurch_Item     ;
+               IncludeCaption=Yes;
+               SourceExpr="Qty. on Purch. Order" }
+
+    { 8   ;1   ;Column  ;PurchasePrice_Item  ;
+               SourceExpr=PurchasePrice }
+
+    { 9   ;1   ;Column  ;ValuePurchasePrice_Item;
+               SourceExpr=ValuePurchasePrice }
+
+    { 11  ;1   ;Column  ;CikkErtek_Item      ;
+               SourceExpr=CikkErtek }
+
+    { 17  ;1   ;Column  ;TotalPurchase       ;
+               SourceExpr=TotalPurchase }
+
+    { 20  ;1   ;Column  ;TotalFIFOertek      ;
+               SourceExpr=TotalFIFOertek }
+
+    { 32  ;1   ;Column  ;NyitottErtek        ;
+               SourceExpr=NyitottErtek }
+
+    { 35  ;1   ;Column  ;LastPurchPriceTxt   ;
+               SourceExpr=LastPurchPriceTxt }
+
+    { 36  ;1   ;Column  ;InvPurchValueTxt    ;
+               SourceExpr=InvPurchValueTxt }
+
+    { 37  ;1   ;Column  ;InvFifoValueTxt     ;
+               SourceExpr=InvFifoValueTxt }
+
+    { 38  ;1   ;Column  ;TotalInvPurchValueTxt;
+               SourceExpr=TotalInvPurchValueTxt }
+
+    { 39  ;1   ;Column  ;TotalInvFifoValueTxt;
+               SourceExpr=TotalInvFifoValueTxt }
+
+    { 40  ;1   ;Column  ;ShippedNotInvTxt    ;
+               SourceExpr=ShippedNotInvTxt }
+
+    { 41  ;1   ;Column  ;UomTxt              ;
+               SourceExpr=UomTxt }
+
+    { 45  ;1   ;Column  ;QtyOnPurchTxt       ;
+               SourceExpr=QtyOnPurchTxt }
+
+    { 42  ;1   ;Column  ;ShowOnlyItemsWithInventory;
+               SourceExpr=ShowOnlyItemsWithInventory }
+
+    { 43  ;1   ;Column  ;ShowPurchasePrice   ;
+               SourceExpr=ShowPurchasePrice }
+
+    { 44  ;1   ;Column  ;ShowSerialNo        ;
+               SourceExpr=ShowSerialNo }
+
+    { 2   ;1   ;DataItem;ILESerialNo         ;
+               DataItemTable=Table32;
+               DataItemTableView=SORTING(Item No.,Open,Variant Code,Positive,Location Code,Posting Date,Expiration Date,Lot No.,Serial No.)
+                                 WHERE(Remaining Quantity=FILTER(>0),
+                                       Lot No.=FILTER(<>''));
+               OnAfterGetRecord=BEGIN
+                                  SerNoCost:=0;
+                                  SerNoErtek:=0;
+                                  CLEAR(VESerNo);
+                                  VESerNo.RESET;
+                                  VESerNo.SETCURRENTKEY("Item Ledger Entry No.","Entry Type");
+                                  VESerNo.SETRANGE("Item Ledger Entry No.",ILE."Entry No.");
+                                  IF VESerNo.FINDFIRST THEN REPEAT
+                                      SerNoErtek+=VESerNo."Cost per Unit";
+                                    UNTIL VESerNo.NEXT=0;
+                                END;
+
+               ReqFilterFields=Posting Date;
+               DataItemLink=Item No.=FIELD(No.),
+                            Location Code=FIELD(Location Filter) }
+
+    { 12  ;2   ;Column  ;LotNo_ILE           ;
+               IncludeCaption=Yes;
+               SourceExpr="Lot No." }
+
+    { 13  ;2   ;Column  ;SerialNo_ILE        ;
+               IncludeCaption=Yes;
+               SourceExpr="Serial No." }
+
+    { 14  ;2   ;Column  ;ExpirationDate_ILE  ;
+               IncludeCaption=Yes;
+               SourceExpr="Expiration Date" }
+
+    { 15  ;2   ;Column  ;RemQty_ILE          ;
+               IncludeCaption=Yes;
+               SourceExpr="Remaining Quantity" }
+
+    { 16  ;2   ;Column  ;SerNoErtek_ILE      ;
+               SourceExpr=SerNoErtek }
+
+    { 34  ;2   ;Column  ;ItemNo_ILE          ;
+               SourceExpr=ILESerialNo."Item No." }
+
+    { 46  ;1   ;DataItem;ItemLocation        ;
+               DataItemTable=Table14;
+               DataItemTableView=SORTING(Code);
+               OnPreDataItem=BEGIN
+                               IF NOT ShowLocations THEN
+                                 CurrReport.BREAK;
+                             END;
+
+               OnAfterGetRecord=BEGIN
+                                  ItemLoc := Item;
+                                  ItemLoc.SETRANGE("Location Filter", ItemLocation.Code);
+                                  ItemLoc.CALCFIELDS("Net Change");
+
+                                  NetChange := ItemLoc."Net Change";
+                                END;
+                                 }
+
+    { 48  ;2   ;Column  ;LocationCode        ;
+               SourceExpr=ItemLocation.Code }
+
+    { 49  ;2   ;Column  ;LocationName        ;
+               SourceExpr=ItemLocation.Name }
+
+    { 47  ;2   ;Column  ;NetChange           ;
+               DecimalPlaces=0:5;
+               SourceExpr=NetChange }
+
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+      { 1   ;    ;Container ;
+                  ContainerType=ContentArea }
+
+      { 2   ;1   ;Group     ;
+                  Name=Options;
+                  CaptionML=HUN=Be ll¡t sok;
+                  GroupType=Group }
+
+      { 6   ;2   ;Field     ;
+                  Name=ShowLocationCtrl;
+                  CaptionML=[ENU=Show Locations;
+                             HUN=K‚szlet rakt rank‚nt];
+                  SourceExpr=ShowLocations }
+
+      { 3   ;2   ;Field     ;
+                  Name=ShowOnlyItemsWithInventoryCtrl;
+                  CaptionML=[ENU=Show Only Items With Inventory;
+                             HUN=Csak a k‚szlettel rendelkez‹ cikkek list z sa];
+                  SourceExpr=ShowOnlyItemsWithInventory }
+
+      { 4   ;2   ;Field     ;
+                  Name=ShowPurchasePriceCtrl;
+                  CaptionML=[ENU=Show Purchase Price;
+                             HUN=Beszerz‚si  r nyomtat sa];
+                  SourceExpr=ShowPurchasePrice }
+
+      { 5   ;2   ;Field     ;
+                  Name=ShowSerialNoCtrl;
+                  CaptionML=[ENU=Show Serial No;
+                             HUN=LOT sz mok megjelen¡t‚se];
+                  SourceExpr=ShowSerialNo }
+
+    }
+  }
+  LABELS
+  {
+  }
+  CODE
+  {
+    VAR
+      ItemFilter@1000 : Text;
+      InventoryListCaptionLbl@7054 : TextConst 'ENU=Inventory - List;HUN=K‚szletlista';
+      CurrReportPageNoCaptionLbl@2595 : TextConst 'ENU=Page;HUN=Oldal';
+      ItemAssemblyBOMCaptionLbl@1113 : TextConst 'ENU=BOM;HUN=DBJ';
+      ItemBlockedCaptionLbl@1979 : TextConst 'ENU=Blocked;HUN=Z rolva';
+      ItemCR@1000000000 : Record 5717;
+      bOnlyMOLItems@1000000002 : Boolean;
+      dFrom@1000000003 : Date;
+      dTo@1000000004 : Date;
+      oKiszallitas@1000000005 : 'Elad s,Kisz ll¡t s';
+      text000@1000000006 : TextConst 'ENU=Inventory Lookout;HUN=K‚szletlista';
+      tItemFilter@1000000010 : Text[250];
+      tSettings@1000000011 : Text[80];
+      decPurchPrice@1000000012 : Decimal;
+      ItemUoM@1000000001 : Record 5404;
+      decQtyPerUoM@1000000013 : Decimal;
+      decSaleTransferQty@1000000014 : Decimal;
+      decQtyToReceive@1000000015 : Decimal;
+      decQtyToSale@1000000026 : Decimal;
+      decInventory@1000000016 : Decimal;
+      decInvDay@1000000017 : Decimal;
+      decInvDay2@1000000018 : Decimal;
+      intWorkDays@1000000020 : Integer;
+      bOnlyWorkDays@1000000021 : Boolean;
+      txtInvDay@1000000022 : Text[18];
+      txtInvDay2@1000000023 : Text[18];
+      CikkLista@1000000024 : Code[20];
+      vendor@1000000025 : Record 23;
+      exceptNull@1000000019 : Boolean;
+      receivedQty@1000000027 : Decimal;
+      onlyIfReceivedNotNull@1000000028 : Boolean;
+      PurchType@1000000029 : 'Purchase,Positive Adjmt.,Negative Adjmt.';
+      PurchasePrice@1000000030 : Decimal;
+      NAGYKERPrice@1000000031 : Decimal;
+      PriceCalcMgt@1000000007 : Codeunit 7000;
+      ShowOnlyItemsWithInventory@1000000009 : Boolean;
+      ValuePurchasePrice@1000000033 : Decimal;
+      ValueNAGYKERPrice@1000000032 : Decimal;
+      TotalPurchase@1000000034 : Decimal;
+      TotalNAGYKER@1000000035 : Decimal;
+      xlLineNo@1000000037 : Integer;
+      CreateExcel@1000000036 : Boolean;
+      raktar@1000000042 : Code[100];
+      ShowPurchasePrice@1000000043 : Boolean;
+      DateFilter@1000000044 : Date;
+      VE@1000000045 : Record 5802;
+      CikkErtek@1000000046 : Decimal;
+      TotalFIFOertek@1000000047 : Decimal;
+      ItemSales@1000000048 : Record 27;
+      ILE@1000000049 : Record 32;
+      ItemCost@1000000050 : Decimal;
+      Location@1000000052 : Record 14;
+      ExcelCol@1000000053 : Text[10];
+      i@1000000054 : Integer;
+      Window@1000000055 : Dialog;
+      WindowText001@1000000056 : TextConst 'HUN=Export l s: @1@@@@@@@@@@@@@\Rakt r:     #2#############\Cikkek:     @3@@@@@@@@@@@@@';
+      TotalCount1@1000000057 : Integer;
+      TotalCount2@1000000058 : Integer;
+      j@1000000059 : Integer;
+      k@1000000060 : Integer;
+      ShowSerialNo@1000000061 : Boolean;
+      VESerNo@1000000062 : Record 5802;
+      SerNoCost@1000000063 : Decimal;
+      SerNoErtek@1000000064 : Decimal;
+      NyitottErtek@1000000065 : Decimal;
+      LastPurchPriceTxt@1001 : TextConst 'ENU=Last Purch. Price;HUN=Utols¢ Besz.µr';
+      InvPurchValueTxt@1002 : TextConst 'ENU=Inventory Purchase Value;HUN=K‚szlet‚rt‚k beker ron';
+      InvFifoValueTxt@1003 : TextConst 'ENU=Inventory FIFO Value;HUN=K‚szlet‚rt‚k FiFo- ron';
+      TotalInvPurchValueTxt@1005 : TextConst 'ENU=Total Inventory Purchase Value;HUN=Teljes k‚szlet‚rt‚k beker ron';
+      TotalInvFifoValueTxt@1004 : TextConst 'ENU=Total Inventory FIFO Value;HUN=Teljes k‚szlet‚rt‚k FiFo- ron';
+      ShippedNotInvTxt@1006 : TextConst 'ENU=Shipped, not invoiced Purch. Value;HUN=Sz ll¡tott, nem sz ml zott beker ron';
+      UomTxt@1007 : TextConst 'ENU=UOM;HUN=ME';
+      QtyOnPurchTxt@1008 : TextConst 'ENU=Qty. on Purchase;HUN=Mennyis‚g beszerz‚sben';
+      NetChange@1009 : Decimal;
+      ItemLoc@1010 : Record 27;
+      ShowLocations@1011 : Boolean;
+
+    BEGIN
+    {
+    }
+    END.
+  }
+  RDLDATA
+  {
+    <?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+      <Fields>
+        <Field Name="ShowLocations">
+          <DataField>ShowLocations</DataField>
+        </Field>
+        <Field Name="CompanyName">
+          <DataField>CompanyName</DataField>
+        </Field>
+        <Field Name="ItemFilter">
+          <DataField>ItemFilter</DataField>
+        </Field>
+        <Field Name="No_Item">
+          <DataField>No_Item</DataField>
+        </Field>
+        <Field Name="Description_Item">
+          <DataField>Description_Item</DataField>
+        </Field>
+        <Field Name="Description2_Item">
+          <DataField>Description2_Item</DataField>
+        </Field>
+        <Field Name="AssemblyBOM_Item">
+          <DataField>AssemblyBOM_Item</DataField>
+        </Field>
+        <Field Name="BaseUnitofMeasure_Item">
+          <DataField>BaseUnitofMeasure_Item</DataField>
+        </Field>
+        <Field Name="InventoryPostingGrp_Item">
+          <DataField>InventoryPostingGrp_Item</DataField>
+        </Field>
+        <Field Name="ShelfNo_Item">
+          <DataField>ShelfNo_Item</DataField>
+        </Field>
+        <Field Name="VendorItemNo_Item">
+          <DataField>VendorItemNo_Item</DataField>
+        </Field>
+        <Field Name="LeadTimeCalculation_Item">
+          <DataField>LeadTimeCalculation_Item</DataField>
+        </Field>
+        <Field Name="ReorderPoint_Item">
+          <DataField>ReorderPoint_Item</DataField>
+        </Field>
+        <Field Name="ReorderPoint_ItemFormat">
+          <DataField>ReorderPoint_ItemFormat</DataField>
+        </Field>
+        <Field Name="AlternativeItemNo_Item">
+          <DataField>AlternativeItemNo_Item</DataField>
+        </Field>
+        <Field Name="Blocked_Item">
+          <DataField>Blocked_Item</DataField>
+        </Field>
+        <Field Name="InventoryListCaption">
+          <DataField>InventoryListCaption</DataField>
+        </Field>
+        <Field Name="CurrReportPageNoCaption">
+          <DataField>CurrReportPageNoCaption</DataField>
+        </Field>
+        <Field Name="ItemAssemblyBOMCaption">
+          <DataField>ItemAssemblyBOMCaption</DataField>
+        </Field>
+        <Field Name="ItemBlockedCaption">
+          <DataField>ItemBlockedCaption</DataField>
+        </Field>
+        <Field Name="NetChange_Item">
+          <DataField>NetChange_Item</DataField>
+        </Field>
+        <Field Name="NetChange_ItemFormat">
+          <DataField>NetChange_ItemFormat</DataField>
+        </Field>
+        <Field Name="Inventory_Item">
+          <DataField>Inventory_Item</DataField>
+        </Field>
+        <Field Name="Inventory_ItemFormat">
+          <DataField>Inventory_ItemFormat</DataField>
+        </Field>
+        <Field Name="QtyOnPurch_Item">
+          <DataField>QtyOnPurch_Item</DataField>
+        </Field>
+        <Field Name="QtyOnPurch_ItemFormat">
+          <DataField>QtyOnPurch_ItemFormat</DataField>
+        </Field>
+        <Field Name="PurchasePrice_Item">
+          <DataField>PurchasePrice_Item</DataField>
+        </Field>
+        <Field Name="PurchasePrice_ItemFormat">
+          <DataField>PurchasePrice_ItemFormat</DataField>
+        </Field>
+        <Field Name="ValuePurchasePrice_Item">
+          <DataField>ValuePurchasePrice_Item</DataField>
+        </Field>
+        <Field Name="ValuePurchasePrice_ItemFormat">
+          <DataField>ValuePurchasePrice_ItemFormat</DataField>
+        </Field>
+        <Field Name="CikkErtek_Item">
+          <DataField>CikkErtek_Item</DataField>
+        </Field>
+        <Field Name="CikkErtek_ItemFormat">
+          <DataField>CikkErtek_ItemFormat</DataField>
+        </Field>
+        <Field Name="TotalPurchase">
+          <DataField>TotalPurchase</DataField>
+        </Field>
+        <Field Name="TotalPurchaseFormat">
+          <DataField>TotalPurchaseFormat</DataField>
+        </Field>
+        <Field Name="TotalFIFOertek">
+          <DataField>TotalFIFOertek</DataField>
+        </Field>
+        <Field Name="TotalFIFOertekFormat">
+          <DataField>TotalFIFOertekFormat</DataField>
+        </Field>
+        <Field Name="NyitottErtek">
+          <DataField>NyitottErtek</DataField>
+        </Field>
+        <Field Name="NyitottErtekFormat">
+          <DataField>NyitottErtekFormat</DataField>
+        </Field>
+        <Field Name="LastPurchPriceTxt">
+          <DataField>LastPurchPriceTxt</DataField>
+        </Field>
+        <Field Name="InvPurchValueTxt">
+          <DataField>InvPurchValueTxt</DataField>
+        </Field>
+        <Field Name="InvFifoValueTxt">
+          <DataField>InvFifoValueTxt</DataField>
+        </Field>
+        <Field Name="TotalInvPurchValueTxt">
+          <DataField>TotalInvPurchValueTxt</DataField>
+        </Field>
+        <Field Name="TotalInvFifoValueTxt">
+          <DataField>TotalInvFifoValueTxt</DataField>
+        </Field>
+        <Field Name="ShippedNotInvTxt">
+          <DataField>ShippedNotInvTxt</DataField>
+        </Field>
+        <Field Name="UomTxt">
+          <DataField>UomTxt</DataField>
+        </Field>
+        <Field Name="QtyOnPurchTxt">
+          <DataField>QtyOnPurchTxt</DataField>
+        </Field>
+        <Field Name="ShowOnlyItemsWithInventory">
+          <DataField>ShowOnlyItemsWithInventory</DataField>
+        </Field>
+        <Field Name="ShowPurchasePrice">
+          <DataField>ShowPurchasePrice</DataField>
+        </Field>
+        <Field Name="ShowSerialNo">
+          <DataField>ShowSerialNo</DataField>
+        </Field>
+        <Field Name="LotNo_ILE">
+          <DataField>LotNo_ILE</DataField>
+        </Field>
+        <Field Name="SerialNo_ILE">
+          <DataField>SerialNo_ILE</DataField>
+        </Field>
+        <Field Name="ExpirationDate_ILE">
+          <DataField>ExpirationDate_ILE</DataField>
+        </Field>
+        <Field Name="RemQty_ILE">
+          <DataField>RemQty_ILE</DataField>
+        </Field>
+        <Field Name="RemQty_ILEFormat">
+          <DataField>RemQty_ILEFormat</DataField>
+        </Field>
+        <Field Name="SerNoErtek_ILE">
+          <DataField>SerNoErtek_ILE</DataField>
+        </Field>
+        <Field Name="SerNoErtek_ILEFormat">
+          <DataField>SerNoErtek_ILEFormat</DataField>
+        </Field>
+        <Field Name="ItemNo_ILE">
+          <DataField>ItemNo_ILE</DataField>
+        </Field>
+        <Field Name="LocationCode">
+          <DataField>LocationCode</DataField>
+        </Field>
+        <Field Name="LocationName">
+          <DataField>LocationName</DataField>
+        </Field>
+        <Field Name="NetChange">
+          <DataField>NetChange</DataField>
+        </Field>
+        <Field Name="NetChangeFormat">
+          <DataField>NetChangeFormat</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Tablix Name="InventoryList">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>2.3758cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>7.75173cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.1194cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.27609cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.74106cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.90299cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.85753cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>3.02367cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.5cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.64382cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemNoCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!No_ItemCaption.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>32</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemDescriptionCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Description_ItemCaption.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>31</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemBaseUnitofMeasureCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!UomTxt.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>29</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemInventoryPostingGroupCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Parameters!Inventory_ItemCaption.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>28</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemShelfNoCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!QtyOnPurchTxt.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>27</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemVendorItemNoCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!LastPurchPriceTxt.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>26</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemLeadTimeCalculationCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!InvPurchValueTxt.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>25</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ItemReorderPointCaption">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!InvFifoValueTxt.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>24</ZIndex>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="LocationCode">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!LocationCode.Value + System.Environment.NewLine + Fields!LocationName.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>LocationCode</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Color>Black</Color>
+                              <Style>Solid</Style>
+                              <Width>1pt</Width>
+                            </TopBorder>
+                            <VerticalAlign>Top</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.1023cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox6">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox6</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingRight>0.0625in</PaddingRight>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>8</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox5">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox5</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingRight>0.0625in</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.43216cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__No__">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!No_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>10</ZIndex>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item_Description">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Description_Item.Value + Fields!Description2_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>9</ZIndex>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__Base_Unit_of_Measure_">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!BaseUnitofMeasure_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>7</ZIndex>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__Inventory_Posting_Group_">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!NetChange_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!NetChange_ItemFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>6</ZIndex>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__Shelf_No__">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!QtyOnPurch_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!QtyOnPurch_ItemFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>5</ZIndex>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__Vendor_Item_No__">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!PurchasePrice_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!PurchasePrice_ItemFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>4</ZIndex>
+                          <Visibility>
+                            <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+                          </Visibility>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__Lead_Time_Calculation_">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ValuePurchasePrice_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!ValuePurchasePrice_ItemFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>3</ZIndex>
+                          <Visibility>
+                            <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+                          </Visibility>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Item__Reorder_Point_">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!CikkErtek_Item.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!CikkErtek_ItemFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <ZIndex>2</ZIndex>
+                          <Visibility>
+                            <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+                          </Visibility>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="NetChange">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Code.BlankZero(Fields!NetChange.Value)</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!NetChangeFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>NetChange</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                              <Width>=iif(First(Fields!No_Item.Value, "DataSet_Result") = Fields!No_Item.Value, "", "1pt")</Width>
+                            </TopBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.46771cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox28">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox28</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox19">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Microsoft.VisualBasic.Interaction.iif(Fields!SerialNo_ILE.Value &lt;&gt; "", Fields!SerialNo_ILE.Value, Fields!LotNo_ILE.Value)</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox17</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ExpirationDate_ILE2">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ExpirationDate_ILE.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ExpirationDate_ILE</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="RemQty_ILE2">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!RemQty_ILE.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!RemQty_ILEFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>RemQty_ILE</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox23">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox20</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox26">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox21</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox27">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Left</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox22</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="SerNoErtek_ILE2">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!SerNoErtek_ILE.Value</Value>
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Format>=Fields!SerNoErtek_ILEFormat.Value</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>SerNoErtek_ILE</rd:DefaultName>
+                          <Visibility>
+                            <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+                          </Visibility>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox32">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontStyle>Normal</FontStyle>
+                                    <FontFamily>Segoe UI</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox32</rd:DefaultName>
+                          <Style>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>5pt</PaddingLeft>
+                            <PaddingRight>5pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember>
+                  <Group Name="ItemLocation">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!LocationCode.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!LocationCode.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                </TablixMember>
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+                <TablixMember />
+                <TablixMember>
+                  <Group Name="Table1_Details_Group">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!No_Item.Value</GroupExpression>
+                    </GroupExpressions>
+                    <DataElementName>Detail</DataElementName>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!No_Item.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!LocationCode.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <TablixMembers>
+                    <TablixMember>
+                      <Visibility>
+                        <Hidden>=iif(Fields!No_Item.Value &lt;&gt; "", false, true)</Hidden>
+                      </Visibility>
+                    </TablixMember>
+                    <TablixMember>
+                      <TablixMembers>
+                        <TablixMember>
+                          <Group Name="No_Item">
+                            <GroupExpressions>
+                              <GroupExpression>=Fields!No_Item.Value</GroupExpression>
+                              <GroupExpression>=Fields!LotNo_ILE.Value</GroupExpression>
+                              <GroupExpression>=Fields!SerialNo_ILE.Value</GroupExpression>
+                            </GroupExpressions>
+                          </Group>
+                          <SortExpressions>
+                            <SortExpression>
+                              <Value>=Fields!No_Item.Value</Value>
+                            </SortExpression>
+                          </SortExpressions>
+                        </TablixMember>
+                      </TablixMembers>
+                      <Visibility>
+                        <Hidden>=iif(Fields!ShowSerialNo.Value, iif((Fields!LotNo_ILE.Value &lt;&gt; "") or (Fields!SerialNo_ILE.Value &lt;&gt; ""), false, true), true)</Hidden>
+                      </Visibility>
+                    </TablixMember>
+                  </TablixMembers>
+                  <DataElementName>Detail_Collection</DataElementName>
+                  <DataElementOutput>Output</DataElementOutput>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <RepeatColumnHeaders>true</RepeatColumnHeaders>
+            <DataSetName>DataSet_Result</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=Fields!No_Item.Value</FilterExpression>
+                <Operator>NotEqual</Operator>
+                <FilterValues>
+                  <FilterValue>""</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>12pt</Top>
+            <Height>1.64599cm</Height>
+            <Width>27.54827cm</Width>
+            <Style />
+          </Tablix>
+          <Textbox Name="ItemTABLECAPTIONItemFilter">
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=First(Fields!ItemFilter.Value)</Value>
+                    <Style>
+                      <FontFamily>Segoe UI</FontFamily>
+                      <FontSize>8pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Height>11pt</Height>
+            <Width>27.54827cm</Width>
+            <ZIndex>1</ZIndex>
+            <Visibility>
+              <Hidden>=IIF(Fields!ItemFilter.Value="",True,False)</Hidden>
+            </Visibility>
+            <DataElementOutput>NoOutput</DataElementOutput>
+            <Style>
+              <Border />
+              <VerticalAlign>Middle</VerticalAlign>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox1">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Last(Fields!TotalPurchase.Value, "DataSet_Result")</Value>
+                    <Style>
+                      <FontFamily>Segoe UI</FontFamily>
+                      <FontSize>8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Format>=Last(Fields!TotalPurchaseFormat.Value, "DataSet_Result")</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>2.53999cm</Top>
+            <Left>23.10174cm</Left>
+            <Height>0.38833cm</Height>
+            <Width>4.44653cm</Width>
+            <ZIndex>2</ZIndex>
+            <Visibility>
+              <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>5pt</PaddingLeft>
+              <PaddingRight>5pt</PaddingRight>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox3">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Last(Fields!TotalFIFOertek.Value, "DataSet_Result")</Value>
+                    <Style>
+                      <FontFamily>Segoe UI</FontFamily>
+                      <FontSize>8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Format>=Last(Fields!TotalFIFOertekFormat.Value, "DataSet_Result")</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>2.9636cm</Top>
+            <Left>23.10174cm</Left>
+            <Height>0.38833cm</Height>
+            <Width>4.44653cm</Width>
+            <ZIndex>3</ZIndex>
+            <Visibility>
+              <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>5pt</PaddingLeft>
+              <PaddingRight>5pt</PaddingRight>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox4">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=First(Fields!TotalInvPurchValueTxt.Value, "DataSet_Result")</Value>
+                    <Style>
+                      <FontFamily>Segoe UI</FontFamily>
+                      <FontSize>8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>2.53999cm</Top>
+            <Left>16.38816cm</Left>
+            <Height>0.38833cm</Height>
+            <Width>6.64302cm</Width>
+            <ZIndex>4</ZIndex>
+            <Visibility>
+              <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox7">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=First(Fields!TotalInvFifoValueTxt.Value, "DataSet_Result")</Value>
+                    <Style>
+                      <FontFamily>Segoe UI</FontFamily>
+                      <FontSize>8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>2.9636cm</Top>
+            <Left>16.38816cm</Left>
+            <Height>0.38833cm</Height>
+            <Width>6.64302cm</Width>
+            <ZIndex>5</ZIndex>
+            <Visibility>
+              <Hidden>=iif(Fields!ShowPurchasePrice.Value, false, true)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Line Name="Line1">
+            <Top>2.34626cm</Top>
+            <Height>0cm</Height>
+            <Width>27.54827cm</Width>
+            <ZIndex>6</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+        </ReportItems>
+        <Height>3.64297cm</Height>
+        <Style />
+      </Body>
+      <Width>27.54827cm</Width>
+      <Page>
+        <PageHeader>
+          <Height>1.22244cm</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="InventoryListCaption1">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!InventoryListCaption.Value,"DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>14pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Height>20pt</Height>
+              <Width>21.91504cm</Width>
+              <Style>
+                <Border />
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="COMPANYNAME1">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!CompanyName.Value,"DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Top>20pt</Top>
+              <Height>11pt</Height>
+              <Width>21.91504cm</Width>
+              <ZIndex>1</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="ExecutionTimeTextBox">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=Globals!ExecutionTime</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <Format>D</Format>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Left>22.09143cm</Left>
+              <Height>11pt</Height>
+              <Width>5.45684cm</Width>
+              <ZIndex>2</ZIndex>
+              <Style>
+                <Border />
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="UserIdTextBox">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=User!UserID</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Top>20pt</Top>
+              <Left>22.09143cm</Left>
+              <Height>11pt</Height>
+              <Width>5.45684cm</Width>
+              <ZIndex>3</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+            <Textbox Name="PageNumberTextBox">
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!CurrReportPageNoCaption.Value,"DataSet_Result") &amp; " " &amp; Globals!PageNumber</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Top>10pt</Top>
+              <Left>22.09143cm</Left>
+              <Height>11pt</Height>
+              <Width>5.45684cm</Width>
+              <ZIndex>4</ZIndex>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style />
+        </PageHeader>
+        <PageHeight>21cm</PageHeight>
+        <PageWidth>29.7cm</PageWidth>
+        <InteractiveHeight>11in</InteractiveHeight>
+        <InteractiveWidth>8.5in</InteractiveWidth>
+        <LeftMargin>1cm</LeftMargin>
+        <RightMargin>1cm</RightMargin>
+        <TopMargin>1cm</TopMargin>
+        <BottomMargin>1cm</BottomMargin>
+        <ColumnSpacing>1.27cm</ColumnSpacing>
+        <Style>
+          <BackgroundColor>White</BackgroundColor>
+        </Style>
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="No_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>No_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>No_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Description_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Description_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Description_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BaseUnitofMeasure_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>BaseUnitofMeasure_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>BaseUnitofMeasure_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="InventoryPostingGrp_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>InventoryPostingGrp_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>InventoryPostingGrp_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ShelfNo_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ShelfNo_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ShelfNo_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="VendorItemNo_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>VendorItemNo_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>VendorItemNo_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LeadTimeCalculation_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LeadTimeCalculation_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LeadTimeCalculation_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ReorderPoint_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ReorderPoint_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ReorderPoint_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="AlternativeItemNo_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>AlternativeItemNo_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>AlternativeItemNo_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="NetChange_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>NetChange_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>NetChange_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Inventory_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>Inventory_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Inventory_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="QtyOnPurch_ItemCaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>QtyOnPurch_ItemCaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>QtyOnPurch_ItemCaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LotNo_ILECaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>LotNo_ILECaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>LotNo_ILECaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="SerialNo_ILECaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>SerialNo_ILECaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>SerialNo_ILECaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ExpirationDate_ILECaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>ExpirationDate_ILECaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ExpirationDate_ILECaption</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="RemQty_ILECaption">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>RemQty_ILECaption</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>RemQty_ILECaption</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>1</NumberOfColumns>
+      <NumberOfRows>16</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>No_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>Description_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>BaseUnitofMeasure_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>InventoryPostingGrp_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>4</RowIndex>
+          <ParameterName>ShelfNo_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>VendorItemNo_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>6</RowIndex>
+          <ParameterName>LeadTimeCalculation_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>7</RowIndex>
+          <ParameterName>ReorderPoint_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>8</RowIndex>
+          <ParameterName>AlternativeItemNo_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>9</RowIndex>
+          <ParameterName>NetChange_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>10</RowIndex>
+          <ParameterName>Inventory_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>11</RowIndex>
+          <ParameterName>QtyOnPurch_ItemCaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>12</RowIndex>
+          <ParameterName>LotNo_ILECaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>13</RowIndex>
+          <ParameterName>SerialNo_ILECaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>14</RowIndex>
+          <ParameterName>ExpirationDate_ILECaption</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>15</RowIndex>
+          <ParameterName>RemQty_ILECaption</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+</Report>
+    END_OF_RDLDATA
+  }
+}
+

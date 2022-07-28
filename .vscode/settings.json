@@ -7,7 +7,7 @@
         //"${AppSourceCop}",
         //"${UICop}" 
     ],
-    "CRS.ObjectNamePrefix": "InT_",
+    //"CRS.ObjectNamePrefix": "InT_",
     "CRS.FileNamePattern": "<ObjectNameShort>.<ObjectTypeShort>.al",
     "CRS.FileNamePatternExtensions": "<ObjectTypeShort>-Ext.<ObjectId>.<ObjectNameShort>.al",
     "CRS.OnSaveAlFileAction": "Rename",

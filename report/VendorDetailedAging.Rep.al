@@ -263,10 +263,8 @@ Report 50106 "Vendor Detailed Aging"
         TempExcelBufTemp.AddColumn(Format("Vendor Ledger Entry"."Original Amount", 0, '<Precision,2:2><Sign><Integer><Decimals>'), false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Format("Vendor Ledger Entry"."Remaining Amount", 0, '<Precision,2:2><Sign><Integer><Decimals>'), false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
         TempExcelBufTemp.AddColumn(Format("Vendor Ledger Entry"."Remaining Amt. (LCY)", 0, '<Precision,2:2><Sign><Integer><Decimals>'), false, '', false, false, false, '', TempExcelBufTemp."Cell Type"::Text);
-        //MakeExcelHeaderSalesLine();
     end;
 
-    // local procedure MakeExcelHeaderSalesLine()
     local procedure MakeInteger1_Line()
     begin
         TempExcelBufTemp.NewRow();
